@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  @font-face{font-family:'PF';src:url('../../../../../library/fonts/playfair-display-latin.woff2');font-weight:400 900}
+  :root{--navy:#111634;--gold:#D4B225;--goldhi:#EBD57A;--ivory:#F5F2E9}
+  *{box-sizing:border-box}
+  html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden;font-family:'Inter','Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  #wrap{position:absolute;left:0;width:1080px;text-align:center;visibility:hidden}
+  .ln{display:block;overflow:hidden;padding:.06em 0 .12em}
+  .ln>span{display:block;font-family:'PF','Playfair Display',Georgia,serif;font-weight:900;letter-spacing:-.025em;line-height:.88;color:var(--navy);text-shadow:7px 8px 0 var(--gold)}
+</style></head>
+<body>
+<div id="wrap"><div class="ln"><span id="w1">HOME</span></div><div class="ln"><span id="w2">EQUITY</span></div></div>
+<script>
+const PLAN=__PLAN__, BRAND=__BRAND__, C=BRAND.colors;
+const W=PLAN.words,T=i=>W[i].s;
+const R=document.documentElement.style;R.setProperty('--navy',C.primary);R.setProperty('--gold',C.accent);R.setProperty('--ivory',C.background_light);
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),prog=(t,a,d)=>clamp((t-a)/d);
+const expo=x=>{x=clamp(x);return x>=1?1:1-Math.pow(2,-10*x)},io=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+// layout (1080x1920): head top is about y 700-780, so line 1 sits mostly above it and line 2 tucks behind it
+const P=new URLSearchParams(location.search);
+const SIZE=+(P.get('size')||226), TOP=+(P.get('top')||392);
+const wrap=document.getElementById('wrap'),w1=document.getElementById('w1'),w2=document.getElementById('w2');
+wrap.style.top=TOP+'px';w1.style.fontSize=w2.style.fontSize=SIZE+'px';
+const A=T(11)-.12, B=T(18)+.15;      // from "home" to the end of "for you."
+function seek(t){
+  const vis=t>=A-.05&&t<=B+.35;wrap.style.visibility=vis?'visible':'hidden';if(!vis)return;
+  const fadeOut=1-io(prog(t,B,.35));
+  w1.style.transform=`translateY(${(1-expo(prog(t,T(11)-.12,.7)))*118}%)`;
+  w2.style.transform=`translateY(${(1-expo(prog(t,T(12)-.12,.7)))*118}%)`;
+  const push=1+.06*io(prog(t,A,B-A));wrap.style.transformOrigin='540px 380px';
+  wrap.style.transform=`scale(${push})`;wrap.style.opacity=fadeOut;
+}
+window.seek=seek;seek(0);
+</script></body></html>

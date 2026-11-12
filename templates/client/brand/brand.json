@@ -1,0 +1,37 @@
+{
+  "name": "CLIENT DISPLAY NAME",
+  "source_of_truth": "e.g. official brand guide v2 / website URL / logo files supplied on DATE",
+  "colors": {
+    "primary": "#000000",
+    "primary_light": "#000000",
+    "primary_dark": "#000000",
+    "accent": "#000000",
+    "background_dark": "#000000",
+    "background_light": "#FFFFFF",
+    "text_on_dark": "#FFFFFF",
+    "text_on_light": "#111111",
+    "positive": "#22B573",
+    "caution": "#E5484D"
+  },
+  "fonts": {
+    "heading": "Font name (file in brand/fonts/ if not a Google font)",
+    "body": "Font name",
+    "caption": "Font name used for burned-in captions",
+    "licence_note": "font licence / where it came from"
+  },
+  "logo": {
+    "full_on_light": "brand/logo.png",
+    "full_on_dark": "brand/logo_white.png",
+    "mark_only": "brand/ring.png",
+    "clear_space": "e.g. height of the mark on all sides",
+    "never": ["stretch", "recolour outside approved variants", "place on busy backgrounds without a plate"]
+  },
+  "motif": "A brand shape that can be reused as a bullet, watermark or loader (e.g. the client's logo ring).",
+  "motion": {
+    "easing": "slow expo-out reveals, line draws, no bounce",
+    "pace": "calm / energetic / editorial",
+    "sound": "soft swishes and chimes / punchy / none"
+  },
+  "style_recipes": ["names of styles/ recipes this client has approved"],
+  "notes": "anything the client said about look and feel"
+}

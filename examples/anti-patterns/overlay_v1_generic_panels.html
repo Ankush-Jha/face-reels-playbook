@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  :root{--navy:#0B1F3A;--navy2:#13305A;--gold:#F2B33D;--red:#E5484D;--green:#22B573;--ink:#0A0F1A;}
+  html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden;font-family:'Montserrat',sans-serif;}
+  .abs{position:absolute;}
+  .panel{background:linear-gradient(160deg,var(--navy2),var(--navy));border-radius:34px;box-shadow:0 18px 50px rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.10);}
+  .chip{display:inline-block;padding:10px 22px;border-radius:999px;font-weight:800;font-size:30px;letter-spacing:2px;text-transform:uppercase;}
+  .cap{position:absolute;left:60px;right:60px;top:1420px;text-align:center;font-family:'Montserrat';font-weight:900;font-size:76px;line-height:1.05;text-transform:uppercase;color:#fff;
+       -webkit-text-stroke:14px #000;paint-order:stroke fill;text-shadow:0 6px 18px rgba(0,0,0,.45);}
+  .cap span{display:inline-block;margin:0 22px;transform-origin:50% 60%;}
+  .cap span.on{color:var(--gold);}
+  .ccard{position:absolute;width:300px;height:190px;border-radius:22px;box-shadow:0 14px 34px rgba(0,0,0,.35);overflow:hidden;}
+  .ccard .chipi{position:absolute;left:28px;top:62px;width:56px;height:42px;border-radius:9px;background:linear-gradient(135deg,#f6d27a,#b8862b);}
+  .ccard .num{position:absolute;left:28px;bottom:26px;font:700 24px 'Montserrat';color:rgba(255,255,255,.85);letter-spacing:4px;}
+  .ccard .tag{position:absolute;right:16px;top:16px;font:900 26px 'Montserrat';color:#fff;background:var(--red);padding:4px 12px;border-radius:10px;}
+  .h1{font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:-1px;}
+  .gold{color:var(--gold);}
+  .sub{font-weight:600;color:rgba(255,255,255,.75);font-size:30px;letter-spacing:3px;text-transform:uppercase;}
+</style></head>
+<body>
+<div id="root"></div>
+<script>
+const TL = __TIMELINE__;
+const W = TL.words;
+const T = i => W[i].s;           // cue: output time of word i
+const root = document.getElementById('root');
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const eo=x=>1-Math.pow(1-clamp(x),3);
+const back=x=>{x=clamp(x);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);};
+// spring-ish pop 0..1
+const pop=x=>{x=clamp(x);return 1+Math.exp(-6*x)*Math.sin(x*12-1.57)*-0.0 + (x<1?0:0) ;};
+function prog(t,a,d){return clamp((t-a)/d);}
+// window envelope: in over din at a, out over dout at b
+function env(t,a,b,din=.28,dout=.22){if(t<a||t>b)return 0;return Math.min(eo((t-a)/din),eo((b-t)/dout));}
+function el(html){const d=document.createElement('div');d.innerHTML=html.trim();const n=d.firstChild;root.appendChild(n);return n;}
+const $=(n,sel)=>n.querySelector(sel);
+
+// ---------- G1 HOOK ----------
+const g1=el(`<div class="abs panel" style="left:90px;top:190px;width:900px;height:400px;">
+  <div class="abs sub" style="left:56px;top:46px;">Credit cards</div>
+  <div class="abs h1" style="left:52px;top:96px;font-size:92px;line-height:.98;">Only paying<br>the <span class="gold">minimum?</span></div>
+  <div class="ccard abs" id="g1c" style="left:560px;top:-70px;background:linear-gradient(135deg,#2b5aa8,#0e2c5c);transform:rotate(12deg)">
+    <div class="chipi"></div><div class="num">•••• 4821</div><div class="tag">MIN DUE</div></div>
+</div>`);
+function d1(t){const a=0,b=T(13)-.05;const e=env(t,a-1,b);g1.style.opacity=e;
+  const s=0.94+0.06*eo(t/0.35);g1.style.transform=`scale(${s})`;
+  const c=$(g1,'#g1c');const k=back(prog(t,0.15,0.5));c.style.transform=`translate(${(1-k)*260}px,${(1-k)*-40}px) rotate(${12-6*Math.sin(t*1.4)*0.3}deg)`;
+  // underline pulse on "minimum" when spoken
+}
+
+// ---------- G2 NAME CARD ----------
+const g2=el(`<div class="abs panel" style="left:150px;top:250px;width:780px;height:200px;">
+  <div class="abs" style="left:34px;top:34px;width:132px;height:132px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font:900 58px Montserrat;color:var(--navy)">KN</div>
+  <div class="abs h1" style="left:196px;top:42px;font-size:50px;letter-spacing:0;text-transform:none">Jane Doe</div>
+  <div class="abs" style="left:198px;top:108px;font:600 28px Montserrat;color:rgba(255,255,255,.8)">Licensed Mortgage Agent · Level 2</div>
+  <div class="abs" style="left:198px;top:138px;height:50px;padding:0 14px;border-radius:12px;background:#fff;display:flex;align-items:center"><img src="brand/logo.png" style="height:40px;width:auto"></div>
+</div>`);
+function d2(t){const a=T(13),b=T(19)-.08;const e=env(t,a,b);g2.style.opacity=e;g2.style.transform=`translateX(${(1-eo(prog(t,a,.4)))*-120}px)`;}
+
+// ---------- G3 ACCOUNT CURRENT ----------
+const g3=el(`<div class="abs panel" style="left:140px;top:220px;width:800px;height:340px;">
+  <div class="abs sub" style="left:50px;top:44px;">Paying the minimum</div>
+  <div class="abs h1" style="left:48px;top:96px;font-size:64px;text-transform:none;letter-spacing:0">Account status</div>
+  <div class="abs" id="g3p" style="left:48px;top:196px;height:100px;border-radius:999px;background:var(--green);display:flex;align-items:center;padding:0 40px 0 26px;gap:18px">
+    <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#fff"/><path id="g3ck" d="M18 33 L28 43 L47 22" stroke="#22B573" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="48" stroke-dashoffset="48"/></svg>
+    <span style="font:900 56px Montserrat;color:#fff;letter-spacing:2px">CURRENT</span></div>
+</div>`);
+function d3(t){const a=T(19),b=T(26)-.05;const e=env(t,a,b);g3.style.opacity=e;g3.style.transform=`translateY(${(1-eo(prog(t,a,.35)))*-40}px)`;
+  const p=$(g3,'#g3p');const k=back(prog(t,T(24),.4));p.style.transform=`scale(${0.2+0.8*k})`;p.style.opacity=clamp(prog(t,T(24),.15));p.style.transformOrigin='0 50%';
+  $(g3,'#g3ck').setAttribute('stroke-dashoffset',48*(1-eo(prog(t,T(25),.35))));}
+
+// ---------- G4 INTEREST FOR YEARS (schematic chart) ----------
+const g4=el(`<div class="abs panel" style="left:110px;top:190px;width:860px;height:410px;">
+  <div class="abs h1" style="left:44px;top:34px;font-size:58px;text-transform:none;letter-spacing:0">Paying interest for <span class="gold" id="g4y" style="display:inline-block">YEARS</span></div>
+  <svg class="abs" style="left:44px;top:120px" width="772" height="260" viewBox="0 0 772 260">
+    <line x1="40" y1="220" x2="760" y2="220" stroke="rgba(255,255,255,.35)" stroke-width="3"/>
+    <line x1="40" y1="10" x2="40" y2="220" stroke="rgba(255,255,255,.35)" stroke-width="3"/>
+    <path id="g4a" d="M40 40 C 260 60, 480 85, 740 120 L740 220 L40 220 Z" fill="rgba(229,72,77,.28)"/>
+    <path id="g4l" d="M40 40 C 260 60, 480 85, 740 120" stroke="#E5484D" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="760" stroke-dashoffset="760"/>
+    <text x="52" y="30" fill="rgba(255,255,255,.8)" font-family="Montserrat" font-weight="700" font-size="24">BALANCE</text>
+    <text x="600" y="252" fill="rgba(255,255,255,.8)" font-family="Montserrat" font-weight="700" font-size="24">TIME →</text>
+  </svg>
+</div>`);
+function d4(t){const a=T(26),b=T(35)-.02;const e=env(t,a,b);g4.style.opacity=e;g4.style.transform=`scale(${0.95+0.05*eo(prog(t,a,.35))})`;
+  const k=eo(prog(t,T(29),1.3));$(g4,'#g4l').setAttribute('stroke-dashoffset',760*(1-k));
+  const ar=$(g4,'#g4a');ar.style.clipPath=`inset(0 ${100-100*k}% 0 0)`;
+  const y=$(g4,'#g4y');const ky=prog(t,T(34)-.05,.35);y.style.transform=`scale(${1+0.35*Math.sin(Math.PI*ky)})`;}
+
+// ---------- G5 HIGH-INTEREST BALANCES (3 cards) ----------
+const cardColors=['linear-gradient(135deg,#2b5aa8,#0e2c5c)','linear-gradient(135deg,#7a3db8,#3b1670)','linear-gradient(135deg,#1f8a70,#0c4a3c)'];
+const g5=el(`<div class="abs" style="left:0;top:0;width:1080px;height:700px;">
+  <div class="abs h1" id="g5t" style="left:0;right:0;top:470px;text-align:center;font-size:66px;-webkit-text-stroke:12px #000;paint-order:stroke fill">High-interest <span class="gold">balances</span></div>
+  ${[0,1,2].map(i=>`<div class="ccard" id="g5c${i}" style="left:390px;top:200px;background:${cardColors[i]}"><div class="chipi"></div><div class="num">•••• ${['4821','7730','1196'][i]}</div><div class="tag">%</div></div>`).join('')}
+</div>`);
+const fan=[[-290,30,-14],[0,-10,0],[290,30,14]];
+function cardsState(t,inA,mergeA){ // returns per-card transform strings
+  return [0,1,2].map(i=>{const ki=back(prog(t,inA+i*0.18,.45));const km=eo(prog(t,mergeA,.55));
+    const [x,y,r]=fan[i];const X=x*(1-km),Y=y*(1-km)+(-1+ki)*-300*0, R=r*(1-km);
+    return {tf:`translate(${X}px,${Y+(1-ki)*420}px) rotate(${R}deg) scale(${0.7+0.3*ki})`,op:clamp(prog(t,inA+i*0.18,.15))*(mergeA>0?1-0.0:1)};});}
+function d5(t){const a=T(35),b=T(42)+.0;const e=env(t,a,b,.2,.12);g5.style.opacity=e;
+  const st=cardsState(t,T(37),999);st.forEach((s,i)=>{const c=$(g5,'#g5c'+i);c.style.transform=s.tf;c.style.opacity=s.op;});
+  const tt=$(g5,'#g5t');const k=back(prog(t,T(39),.4));tt.style.transform=`scale(${0.6+0.4*k})`;tt.style.opacity=clamp(prog(t,T(39),.12));}
+
+// ---------- G6 DEBT CONSOLIDATION (merge) ----------
+const g6=el(`<div class="abs" style="left:0;top:0;width:1080px;height:700px;">
+  ${[0,1,2].map(i=>`<div class="ccard" id="g6c${i}" style="left:390px;top:200px;background:${cardColors[i]}"><div class="chipi"></div><div class="num">•••• ${['4821','7730','1196'][i]}</div><div class="tag">%</div></div>`).join('')}
+  <div class="abs" id="g6one" style="left:330px;top:175px;width:420px;height:250px;border-radius:28px;background:linear-gradient(135deg,#F2B33D,#d18f12);box-shadow:0 18px 44px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div style="font:800 26px Montserrat;color:#0B1F3A;letter-spacing:4px">ONE</div><div style="font:900 64px Montserrat;color:#0B1F3A;line-height:1">LOAN</div></div>
+  <div class="abs h1" id="g6t" style="left:0;right:0;top:455px;text-align:center;font-size:84px;-webkit-text-stroke:14px #000;paint-order:stroke fill">Debt <span class="gold">consolidation</span></div>
+</div>`);
+function d6(t){const a=T(42),b=T(48)-.05;const e=env(t,a,b,.12,.22);g6.style.opacity=e;
+  const m=T(43)+.25;
+  [0,1,2].forEach(i=>{const c=$(g6,'#g6c'+i);const km=eo(prog(t,m,.5));const [x,y,r]=fan[i];
+    c.style.transform=`translate(${x*(1-km)}px,${y*(1-km)}px) rotate(${r*(1-km)}deg) scale(${1-0.25*km})`;c.style.opacity=1-clamp(prog(t,m+.4,.15));});
+  const o=$(g6,'#g6one');const ko=back(prog(t,m+.42,.45));o.style.transform=`scale(${ko})`;o.style.opacity=clamp(prog(t,m+.42,.1));
+  const tt=$(g6,'#g6t');const k=back(prog(t,a,.35));tt.style.transform=`scale(${1.6-0.6*k})`;tt.style.opacity=clamp(prog(t,a,.1));}
+
+// ---------- G7 OPTIONS ----------
+const g7=el(`<div class="abs" style="left:0;top:0;width:1080px;height:700px;">
+  <div class="abs" id="g7h" style="left:0;right:0;top:190px;text-align:center"><span class="chip" style="background:var(--navy);color:#fff;border:2px solid rgba(255,255,255,.2)">Depending on your situation</span></div>
+  <div class="abs panel" id="g7a" style="left:70px;top:290px;width:420px;height:250px;display:flex;flex-direction:column;justify-content:center;padding-left:36px;box-sizing:border-box">
+    <div style="font:800 24px Montserrat;color:var(--gold);letter-spacing:3px">OPTION 1</div><div style="font:900 50px Montserrat;color:#fff;line-height:1.05;margin-top:8px">Consolidation<br>loan</div></div>
+  <div class="abs" id="g7or" style="left:490px;top:375px;width:100px;height:100px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font:900 36px Montserrat;color:var(--navy);z-index:2">OR</div>
+  <div class="abs panel" id="g7b" style="left:590px;top:290px;width:420px;height:250px;display:flex;flex-direction:column;justify-content:center;padding-left:36px;box-sizing:border-box">
+    <div style="font:800 24px Montserrat;color:var(--gold);letter-spacing:3px">OPTION 2</div><div style="font:900 50px Montserrat;color:#fff;line-height:1.05;margin-top:8px">Mortgage-based<br>option</div></div>
+</div>`);
+function d7(t){const a=T(48),b=T(58)-.05;const e=env(t,a,b);g7.style.opacity=e;
+  const h=$(g7,'#g7h');h.style.opacity=clamp(prog(t,a,.2));h.style.transform=`translateY(${(1-eo(prog(t,a,.35)))*-30}px)`;
+  [['#g7a',T(53)-.1],['#g7b',T(56)-.1]].forEach(([s,c])=>{const n=$(g7,s);const k=back(prog(t,c,.45));n.style.opacity=clamp(prog(t,c,.12));n.style.transform=`translateY(${(1-k)*120}px) scale(${0.85+0.15*k})`;});
+  const o=$(g7,'#g7or');const ko=back(prog(t,T(55)-.05,.35));o.style.opacity=clamp(prog(t,T(55)-.05,.1));o.style.transform=`scale(${ko}) rotate(${(1-ko)*-90}deg)`;}
+
+// ---------- G8 RESTRUCTURE ----------
+const bills=[[-330,-60],[-330,70],[-180,-60],[-180,70]];
+const g8=el(`<div class="abs" style="left:0;top:0;width:1080px;height:700px;">
+  <div class="abs h1" id="g8t" style="left:0;right:0;top:190px;text-align:center;font-size:64px;-webkit-text-stroke:12px #000;paint-order:stroke fill">Restructure your <span class="gold">payments</span></div>
+  ${bills.map((b,i)=>`<div class="abs" id="g8b${i}" style="left:${540+b[0]-70}px;top:${410+b[1]-50}px;width:140px;height:100px;border-radius:16px;background:#fff;box-shadow:0 8px 20px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font:900 26px Montserrat;color:var(--red)">BILL</div>`).join('')}
+  <svg class="abs" id="g8ar" style="left:470px;top:380px" width="140" height="70" viewBox="0 0 140 70"><path d="M5 35 H115 M90 10 L120 35 L90 60" stroke="#F2B33D" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="abs" id="g8one" style="left:640px;top:330px;width:330px;height:170px;border-radius:24px;background:var(--green);box-shadow:0 12px 30px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff">
+    <div style="font:800 24px Montserrat;letter-spacing:3px">ONE</div><div style="font:900 50px Montserrat;line-height:1">PAYMENT</div></div>
+</div>`);
+function d8(t){const a=T(58),b=T(64)-.05;const e=env(t,a,b);g8.style.opacity=e;
+  const tt=$(g8,'#g8t');tt.style.opacity=clamp(prog(t,a,.15));tt.style.transform=`translateY(${(1-eo(prog(t,a,.35)))*-40}px)`;
+  bills.forEach((bb,i)=>{const n=$(g8,'#g8b'+i);const ki=back(prog(t,a+.1+i*.08,.35));const km=eo(prog(t,T(61),.6));
+    n.style.opacity=clamp(prog(t,a+.1+i*.08,.1))*(1-clamp(prog(t,T(61)+.45,.15)));
+    n.style.transform=`translate(${(255-bb[0]-0)*km*0+ ( (805-540-bb[0]) )*km}px,${-bb[1]*km}px) scale(${ki*(1-0.5*km)}) rotate(${(i%2?6:-6)*(1-km)}deg)`;});
+  const ar=$(g8,'#g8ar');ar.style.opacity=clamp(prog(t,a+.4,.2))*(1-clamp(prog(t,T(61),.3)));
+  const o=$(g8,'#g8one');const ko=back(prog(t,T(61)+.45,.45));o.style.opacity=clamp(prog(t,T(61)+.45,.1));o.style.transform=`scale(${ko})`;}
+
+// ---------- G9 THE GOAL ----------
+const g9=el(`<div class="abs panel" style="left:110px;top:190px;width:860px;height:400px;">
+  <div class="abs sub" style="left:52px;top:42px;color:var(--gold)">The goal</div>
+  <div class="abs" id="g9r1" style="left:48px;top:100px;display:flex;align-items:center;gap:24px">
+    <div style="width:84px;height:84px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center"><svg width="50" height="50" viewBox="0 0 64 64"><path d="M14 33 L27 46 L50 20" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div style="font:900 64px Montserrat;color:#fff">Reduce your debt</div></div>
+  <div class="abs" id="g9r2" style="left:48px;top:236px;display:flex;align-items:center;gap:24px">
+    <div style="width:84px;height:84px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center"><svg width="44" height="44" viewBox="0 0 64 64"><path d="M16 16 L48 48 M48 16 L16 48" stroke="#fff" stroke-width="10" stroke-linecap="round"/></svg></div>
+    <div style="position:relative;font:800 60px Montserrat;color:rgba(255,255,255,.75)">Just move it around<div id="g9s" style="position:absolute;left:-6px;top:50%;height:8px;background:var(--red);border-radius:4px;width:0"></div></div></div>
+</div>`);
+function d9(t){const a=T(64),b=T(76)-.05;const e=env(t,a,b);g9.style.opacity=e;g9.style.transform=`translateY(${(1-eo(prog(t,a,.35)))*-40}px)`;
+  [['#g9r1',T(68)-.08],['#g9r2',T(71)-.08]].forEach(([s,c])=>{const n=$(g9,s);const k=back(prog(t,c,.4));n.style.opacity=clamp(prog(t,c,.12));n.style.transform=`translateX(${(1-k)*-80}px)`;});
+  $(g9,'#g9s').style.width=(eo(prog(t,T(73),.45))*600)+'px';}
+
+// ---------- G10 CTA + END CARD ----------
+const g10=el(`<div class="abs" style="left:0;top:0;width:1080px;height:1920px;">
+  <div class="abs" id="g10btn" style="left:190px;top:230px;width:700px;height:150px;border-radius:999px;background:linear-gradient(90deg,#F2B33D,#ffcf6b);box-shadow:0 16px 40px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;gap:26px">
+    <svg width="74" height="74" viewBox="0 0 24 24"><path d="M22 2 L11 13 M22 2 L15 22 L11 13 L2 9 Z" stroke="#0B1F3A" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
+    <span style="font:900 72px Montserrat;color:#0B1F3A">DM me</span></div>
+  <div class="abs" id="g10h" style="left:0;right:0;top:410px;text-align:center;font:800 44px Montserrat;color:#fff;-webkit-text-stroke:10px #000;paint-order:stroke fill">@janedoe</div>
+  <div class="abs" id="g10s" style="left:0;right:0;top:480px;text-align:center"><span class="chip" style="background:var(--navy);color:#fff;font-size:30px;border:2px solid rgba(255,255,255,.2)">A smarter repayment strategy</span></div>
+  <div class="abs" id="g10end" style="left:0;top:0;width:1080px;height:1920px;background:radial-gradient(120% 80% at 50% 25%,#16386a 0%,#0B1F3A 55%,#071427 100%);">
+    <div class="abs" id="e0" style="left:250px;top:300px;width:580px;height:214px;border-radius:30px;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center"><img src="brand/logo.png" style="width:520px;height:auto;display:block"></div>
+    <div class="abs" id="e1" style="left:0;right:0;top:575px;text-align:center;font:900 64px Montserrat;color:#fff">Jane Doe</div>
+    <div class="abs" id="e2" style="left:0;right:0;top:662px;text-align:center;font:600 28px Montserrat;color:rgba(255,255,255,.85)">Licensed Mortgage Agent, Level 2 · Lic. #M00000000</div>
+    <div class="abs" id="e3" style="left:240px;top:740px;width:600px;height:130px;border-radius:999px;background:linear-gradient(90deg,#F2B33D,#ffcf6b);box-shadow:0 16px 40px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font:900 62px Montserrat;color:#0B1F3A">DM me</div>
+    <div class="abs" id="e4" style="left:90px;top:930px;width:900px"><div style="display:flex;align-items:center;gap:24px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.14)"><span style="width:190px;font:800 22px Montserrat;color:var(--gold);letter-spacing:3px">CALL / TEXT</span><span style="font:700 28px Montserrat;color:#fff">555-555-0100</span></div><div style="display:flex;align-items:center;gap:24px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.14)"><span style="width:190px;font:800 22px Montserrat;color:var(--gold);letter-spacing:3px">EMAIL</span><span style="font:700 26px Montserrat;color:#fff">jane@example.com</span></div><div style="display:flex;align-items:center;gap:24px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.14)"><span style="width:190px;font:800 22px Montserrat;color:var(--gold);letter-spacing:3px">INSTAGRAM</span><span style="font:700 28px Montserrat;color:#fff">@janedoe</span></div><div style="display:flex;align-items:center;gap:24px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.14)"><span style="width:190px;font:800 22px Montserrat;color:var(--gold);letter-spacing:3px">WEBSITE</span><span style="font:700 28px Montserrat;color:#fff">example.com</span></div><div style="display:flex;align-items:center;gap:24px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.14)"><span style="width:190px;font:800 22px Montserrat;color:var(--gold);letter-spacing:3px">OFFICE</span><span style="font:700 26px Montserrat;color:#fff">1 Main St, Anytown, ON</span></div></div>
+    <div class="abs" id="e5" style="left:100px;width:880px;top:1330px;text-align:center;font:500 20px Montserrat;color:rgba(255,255,255,.7);line-height:1.35">General information only, not financial advice. Options depend on your situation and are subject to lender approval (O.A.C.).<div style="margin-top:10px;font:800 20px Montserrat;color:var(--gold);letter-spacing:2px">EXAMPLE MORTGAGE GROUP · BROKERAGE LIC. #00000</div></div>
+  </div>
+</div>`);
+function d10(t){const a=T(76)-.05;const e=t>=a?1:0;g10.style.opacity=e;
+  const bt=$(g10,'#g10btn');const k=back(prog(t,a,.45));bt.style.transform=`scale(${0.5+0.5*k})`;bt.style.opacity=clamp(prog(t,a,.1));
+  // gentle pulse after landing
+  if(t>a+.6){bt.style.transform=`scale(${1+0.025*Math.sin((t-a)*6)})`;}
+  const h=$(g10,'#g10h');h.style.opacity=clamp(prog(t,T(77)-.05,.2));
+  const s=$(g10,'#g10s');const ks=back(prog(t,T(83)-.1,.4));s.style.opacity=clamp(prog(t,T(83)-.1,.12));s.style.transform=`translateY(${(1-ks)*30}px)`;
+  const en=$(g10,'#g10end');const t0=TL.speech_end-.1;en.style.opacity=eo(prog(t,t0,.4));['e0','e1','e2','e3','e4','e5'].forEach((id,i)=>{const q=$(en,'#'+id);const k=eo(prog(t,t0+.15+i*.12,.5));q.style.opacity=k;q.style.transform=`translateY(${(1-k)*40}px)`;});}
+
+// ---------- CAPTIONS ----------
+const capEl=el(`<div class="cap"></div>`);
+const chunks=[];{let cur=[];W.forEach((w,i)=>{cur.push(i);const p=/[.,?!:]$/.test(w.w);if(cur.length>=3||p||(cur.length>=2&&W[i].w.length>11)){chunks.push(cur);cur=[];}});if(cur.length)chunks.push(cur);}
+function dcap(t){if(t>=TL.speech_end+0.05){capEl.style.opacity=0;return;}capEl.style.opacity=1;
+  let ci=-1;for(let k=0;k<chunks.length;k++){const s=W[chunks[k][0]].s-0.04;const nx=k+1<chunks.length?W[chunks[k+1][0]].s-0.04:TL.speech_end+0.05;if(t>=s&&t<nx){ci=k;break;}}
+  if(ci<0){capEl.innerHTML='';return;}
+  const ch=chunks[ci];const st=W[ch[0]].s-0.04;
+  const k=back(prog(t,st,.18));
+  capEl.style.transform=`scale(${0.88+0.12*k})`;
+  capEl.innerHTML=ch.map(i=>{const on=t>=W[i].s-0.03&&(t<W[i].e||i===ch[ch.length-1]);const txt=W[i].w.replace(/[.,?!:]$/,'').replace(/^Here's$/,"HERE'S");
+    const sc=on?1.08:1;return `<span class="${on?'on':''}" style="transform:scale(${sc})">${txt}</span>`;}).join('');}
+
+
+// ---- v2 overrides: make room for B-roll ----
+$(g4,'svg').remove(); g4.style.height='150px';
+[0,1,2].forEach(i=>$(g5,'#g5c'+i).remove());
+function d2(t){const a=T(13),b=T(17)+0.15;const e=env(t,a,b);g2.style.opacity=e;g2.style.transform=`translateX(${(1-eo(prog(t,a,.4)))*-120}px)`;}
+function d3(t){const a=T(21)-0.02,b=T(26)-.05;const e=env(t,a,b);g3.style.opacity=e;g3.style.transform=`translateY(${(1-eo(prog(t,a,.35)))*-40}px)`;
+  const p=$(g3,'#g3p');const k=back(prog(t,T(24),.4));p.style.transform=`scale(${0.2+0.8*k})`;p.style.opacity=clamp(prog(t,T(24),.15));p.style.transformOrigin='0 50%';
+  $(g3,'#g3ck').setAttribute('stroke-dashoffset',48*(1-eo(prog(t,T(25),.35))));}
+function d4(t){const a=T(29)-0.1,b=T(35)-.02;const e=env(t,a,b);g4.style.opacity=e;g4.style.transform=`scale(${0.95+0.05*eo(prog(t,a,.35))})`;
+  const y=$(g4,'#g4y');const ky=prog(t,T(34)-.05,.35);y.style.transform=`scale(${1+0.35*Math.sin(Math.PI*ky)})`;}
+function d5(t){const a=T(39)-.25,b=T(42);const e=env(t,a,b,.2,.12);g5.style.opacity=e;
+  const tt=$(g5,'#g5t');const k=back(prog(t,T(39),.4));tt.style.transform=`scale(${0.6+0.4*k})`;tt.style.opacity=clamp(prog(t,T(39),.12));}
+
+function seek(t){d1(t);d2(t);d3(t);d4(t);d5(t);d6(t);d7(t);d8(t);d9(t);d10(t);dcap(t);}
+window.seek=seek;seek(0);
+</script></body></html>

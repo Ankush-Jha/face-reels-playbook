@@ -1,0 +1,20 @@
+{
+  "_comment": "Machine-checked by tools/compliance_check.py. Fill from the client's regulator rules and brokerage policy. Claude's defaults are only a starting point: the client's compliance contact has the final say.",
+  "regulator": "",
+  "reviewer": { "name": "", "contact": "", "turnaround": "" },
+  "require_all_strings": [
+    "exact text that MUST appear on screen in every reel (licence numbers, brokerage name)"
+  ],
+  "require_disclaimer": "exact disclaimer sentence(s) for the end card",
+  "forbid_patterns": [
+    "guaranteed",
+    "best rate",
+    "lowest rate",
+    "pre-approved for sure",
+    "no credit check"
+  ],
+  "numbers_policy": "No rates, payments, savings or percentages on screen unless the client supplies the figure and its source and date. Charts and diagrams without client data must be labelled ILLUSTRATION.",
+  "claims_policy": "Educational language only: 'may', 'depending on your situation', 'subject to approval'. No promises of approval, savings or outcomes.",
+  "min_end_card_seconds": 3,
+  "min_disclaimer_px_at_1080w": 24
+}

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  :root{--navy:#111634;--navy2:#1A2150;--deep:#0A0D26;--gold:#D4B225;--goldhi:#EBD57A;--goldlo:#9C8010;--ivory:#F5F2E9;}
+  *{box-sizing:border-box}
+  html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden;font-family:'Inter','Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  #stage{position:absolute;left:0;top:0;width:1080px;height:1920px}
+  #scrim{position:absolute;left:0;top:0;width:1080px;height:920px;opacity:0;
+    background:linear-gradient(180deg,rgba(10,13,38,.86) 0%,rgba(10,13,38,.70) 46%,rgba(10,13,38,0) 100%)}
+  .g{position:absolute;left:84px;top:232px;width:912px;visibility:hidden}
+  .lab{display:flex;align-items:center;gap:16px;height:32px}
+  .lab img{width:34px;height:34px;display:block}
+  .lab span{font:600 24px/1 Inter;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+  .lab .rule{flex:1;height:1.5px;background:linear-gradient(90deg,rgba(212,178,37,.8),rgba(212,178,37,0));transform-origin:0 50%}
+  .hd{font:600 62px/1.06 Inter;letter-spacing:-.028em;color:#fff;margin:20px 0 0;text-shadow:0 2px 28px rgba(10,13,38,.6)}
+  .hd em{font-style:normal;color:var(--gold);position:relative;display:inline-block}
+  .hd em .u{position:absolute;left:0;right:0;bottom:-.02em;height:4px;background:linear-gradient(90deg,var(--goldlo),var(--goldhi),var(--gold));transform-origin:0 50%;transform:scaleX(0);border-radius:2px}
+  .ln{display:block;overflow:hidden;padding:.1em 0 .18em;margin:-.1em 0 -.18em}
+  .ln>span{display:block;will-change:transform}
+  svg{display:block;overflow:visible}
+  .card{background:rgba(17,22,52,.93);border:1.5px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  .dr{stroke-dasharray:1;stroke-dashoffset:1}
+  .caps{font:600 18px/1 Inter;letter-spacing:.24em;text-transform:uppercase}
+  /* captions (unchanged style) */
+  .cap{position:absolute;left:60px;right:60px;top:1420px;text-align:center;font-family:'Montserrat';font-weight:900;font-size:76px;line-height:1.05;text-transform:uppercase;color:#fff;
+       -webkit-text-stroke:14px #000;paint-order:stroke fill;text-shadow:0 6px 18px rgba(0,0,0,.45);}
+  .cap span{display:inline-block;margin:0 22px;transform-origin:50% 60%;}
+  .cap span.on{color:#D4B225;}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="gg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9C8010"/><stop offset=".5" stop-color="#EBD57A"/><stop offset="1" stop-color="#D4B225"/></linearGradient>
+  <linearGradient id="flowg" gradientUnits="userSpaceOnUse" x1="120" y1="0" x2="560" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#D4B225"/></linearGradient>
+  <linearGradient id="areag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D4B225" stop-opacity=".38"/><stop offset="1" stop-color="#D4B225" stop-opacity="0"/></linearGradient>
+</defs></svg>
+<div id="stage"><div id="scrim"></div></div>
+<script>
+const TL = __TIMELINE__;
+const W = TL.words, T = i => W[i].s;
+const stage = document.getElementById('stage'), scrim = document.getElementById('scrim');
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const prog=(t,a,d)=>clamp((t-a)/d);
+const E={out:x=>1-Math.pow(1-clamp(x),4), expo:x=>{x=clamp(x);return x>=1?1:1-Math.pow(2,-10*x)}, io:x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2}, lin:x=>clamp(x)};
+const pol=(cx,cy,r,deg)=>[cx+r*Math.cos(deg*Math.PI/180), cy+r*Math.sin(deg*Math.PI/180)];
+const arcP=(cx,cy,r,a0,a1)=>{const [x0,y0]=pol(cx,cy,r,a0),[x1,y1]=pol(cx,cy,r,a1);return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;};
+const $=(n,s)=>n.querySelector(s), $$=(n,s)=>[...n.querySelectorAll(s)];
+const RING='brand/ring.png';
+
+// ----- registry -----
+const gs=[];
+function G(a,b,html,upd,o={}){const root=document.createElement('div');root.className='g';if(o.style)root.style.cssText+=o.style;root.innerHTML=html;stage.appendChild(root);
+  const g={root,a,b,upd,din:o.din??.4,dout:o.dout??.35,scrim:o.scrim!==false};gs.push(g);return root;}
+// helpers
+function lines(root,t,a,step=.09,d=.8){$$(root,'.ln>span').forEach((s,i)=>{s.style.transform=`translateY(${(1-E.expo(prog(t,a+i*step,d)))*112}%)`;});}
+function label(root,t,a){const l=$(root,'.lab');if(!l)return;const im=$(l,'img'),sp=$(l,'span'),ru=$(l,'.rule');
+  im.style.opacity=E.out(prog(t,a,.4));im.style.transform=`rotate(${(1-E.expo(prog(t,a,.9)))*-120}deg) scale(${.6+.4*E.expo(prog(t,a,.6))})`;
+  sp.style.opacity=E.out(prog(t,a+.08,.4));sp.style.transform=`translateX(${(1-E.expo(prog(t,a+.08,.7)))*-14}px)`;ru.style.transform=`scaleX(${E.io(prog(t,a+.1,1.0))})`;}
+function draw(el,t,a,d){el.style.strokeDashoffset=1-E.io(prog(t,a,d));}
+function fade(el,t,a,d=.4,dy=0){const k=E.out(prog(t,a,d));el.style.opacity=k;if(dy)el.style.transform=`translateY(${(1-E.expo(prog(t,a,d+.3)))*dy}px)`;}
+const LAB=(txt)=>`<div class="lab"><img src="${RING}"><span>${txt}</span><i class="rule"></i></div>`;
+
+// =====================================================================
+// G1  HOOK  -  credit-card statement document, minimum due highlighted
+// =====================================================================
+const skel=(w,c='#D6D0BF')=>`<i class="sk" style="display:block;height:18px;width:${w}px;border-radius:8px;background:${c};transform-origin:100% 50%"></i>`;
+const g1=G(0,T(13)-.05,`
+  ${LAB('Credit cards')}
+  <h1 class="hd" style="font-size:84px;line-height:1.0"><span class="ln"><span>Only paying</span></span><span class="ln"><span>the <em>minimum?<i class="u"></i></em></span></span></h1>
+  <div id="doc" style="margin-top:30px;width:912px;height:282px;background:#F5F2E9;border-radius:12px;box-shadow:0 26px 64px rgba(0,0,0,.5);overflow:hidden;position:relative">
+    <div style="height:60px;background:#111634;display:flex;align-items:center;padding:0 28px;gap:14px"><img src="${RING}" style="width:30px;height:30px"><span style="font:600 19px Inter;letter-spacing:.28em;color:#EBD57A">CREDIT CARD STATEMENT</span><span style="margin-left:auto;font:500 16px Inter;letter-spacing:.22em;color:rgba(255,255,255,.5)">ILLUSTRATION</span></div>
+    <div class="row" style="height:72px;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid rgba(17,22,52,.10)"><span style="font:500 29px Inter;color:rgba(17,22,52,.72)">Statement balance</span><span style="margin-left:auto">${skel(210)}</span></div>
+    <div id="hlrow" style="height:78px;display:flex;align-items:center;padding:0 32px;position:relative;border-bottom:1px solid rgba(17,22,52,.10)">
+      <i id="hl" style="position:absolute;left:0;top:0;bottom:0;width:100%;background:linear-gradient(90deg,rgba(212,178,37,.55),rgba(212,178,37,.22));transform-origin:0 50%;transform:scaleX(0)"></i>
+      <i id="hlbar" style="position:absolute;left:0;top:0;bottom:0;width:7px;background:#D4B225;transform:scaleY(0)"></i>
+      <span style="position:relative;font:700 31px Inter;color:#111634">Minimum payment due</span><span style="position:relative;margin-left:auto">${skel(112,'#111634')}</span></div>
+    <div class="row" style="height:72px;display:flex;align-items:center;padding:0 32px"><span style="font:500 29px Inter;color:rgba(17,22,52,.72)">Payment due date</span><span style="margin-left:auto">${skel(150)}</span></div>
+  </div>`,
+  (t,r)=>{label(r,t,.05);lines(r,t,.12);
+    const doc=$(r,'#doc');const k=E.expo(prog(t,.5,.9));doc.style.opacity=clamp(prog(t,.5,.35));doc.style.transform=`translateY(${(1-k)*46}px)`;
+    $$(r,'.sk').forEach((s,i)=>{s.style.transform=`scaleX(${E.out(prog(t,.95+i*.12,.6))})`;});
+    const h=E.io(prog(t,T(6)-.2,.7));$(r,'#hl').style.transform=`scaleX(${h})`;$(r,'#hlbar').style.transform=`scaleY(${E.out(prog(t,T(6)-.2,.4))})`;
+    $(r,'.u').style.transform=`scaleX(${E.io(prog(t,T(6)-.1,.7))})`;});
+
+// =====================================================================
+// G2  NAME  -  identity badge with the brand aperture
+// =====================================================================
+const g2=G(T(13),T(17)+.15,`
+  <div style="display:flex;align-items:center;gap:30px">
+    <img id="n_ring" src="${RING}" style="width:108px;height:108px;display:block">
+    <div>
+      <div class="ln" style="font:600 60px/1.05 Inter;letter-spacing:-.025em;color:#fff;text-shadow:0 2px 24px rgba(10,13,38,.6)"><span>Jane Doe</span></div>
+      <div class="ln" style="margin-top:16px;font:600 23px/1 Inter;letter-spacing:.2em;color:#D4B225"><span>LICENSED MORTGAGE AGENT · LEVEL 2</span></div>
+      <div class="ln" style="margin-top:10px;font:500 23px/1 Inter;letter-spacing:.2em;color:rgba(255,255,255,.72)"><span>EXAMPLE MORTGAGE GROUP</span></div>
+    </div>
+  </div>
+  <i id="n_rule" style="display:block;margin-top:26px;height:1.5px;background:linear-gradient(90deg,rgba(212,178,37,.85),rgba(212,178,37,0));transform-origin:0 50%"></i>`,
+  (t,r)=>{const a=T(13);const k=E.expo(prog(t,a,1.0));const rg=$(r,'#n_ring');rg.style.opacity=E.out(prog(t,a,.35));rg.style.transform=`rotate(${(1-k)*-160}deg) scale(${.5+.5*k})`;
+    lines(r,t,a+.12,.1,.8);$(r,'#n_rule').style.transform=`scaleX(${E.io(prog(t,a+.3,1.0))})`;});
+
+// =====================================================================
+// G3  ACCOUNT CURRENT  -  banking-app notification
+// =====================================================================
+const g3=G(T(21)-.02,T(26)-.05,`
+  <div id="ban" style="height:206px;border-radius:28px;background:rgba(17,22,52,.97);border:1.5px solid rgba(212,178,37,.5);box-shadow:0 26px 64px rgba(0,0,0,.5);display:flex;align-items:center;gap:28px;padding:0 34px">
+    <div style="width:104px;height:104px;border-radius:26px;background:linear-gradient(150deg,#1D2559,#0A0D26);border:1.5px solid rgba(212,178,37,.35);display:flex;align-items:center;justify-content:center;flex:none"><img src="${RING}" style="width:68px;height:68px"></div>
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center"><span class="caps" style="font-size:19px;color:rgba(255,255,255,.62)">Example Mortgage Group</span><span style="margin-left:auto;font:500 21px Inter;color:rgba(255,255,255,.45)">now</span></div>
+      <div style="margin-top:10px;font:600 48px/1.05 Inter;letter-spacing:-.02em;color:#fff">Account status</div>
+      <div style="margin-top:8px;font:400 29px/1.25 Inter;color:rgba(255,255,255,.8)">Minimum payment received.<br><b style="font-weight:600;color:#EBD57A">Account current</b></div>
+    </div>
+    <svg width="68" height="68" viewBox="0 0 68 68" style="flex:none"><circle class="dr" id="ck_c" pathLength="1" cx="34" cy="34" r="30" fill="none" stroke="#D4B225" stroke-width="3.5"/><path class="dr" id="ck_p" pathLength="1" d="M20 35 L30 45 L49 24" fill="none" stroke="#EBD57A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>`,
+  (t,r)=>{const a=T(21)-.02;const b=$(r,'#ban');const k=E.expo(prog(t,a,.7));b.style.transform=`translateY(${(1-k)*-260}px)`;
+    draw($(r,'#ck_c'),t,T(24),.45);draw($(r,'#ck_p'),t,T(24)+.35,.4);});
+
+// =====================================================================
+// G4  INTEREST FOR YEARS  -  line chart (illustrative)
+// =====================================================================
+const CURVE='M70 70 C 250 78, 430 112, 600 150 S 820 206, 880 214';
+const g4=G(T(29)-.1,T(35)-.02,`
+  ${LAB('Interest')}
+  <h1 class="hd" style="font-size:58px"><span class="ln"><span>Paying interest for <em>years<i class="u"></i></em></span></span></h1>
+  <div class="card" style="margin:20px -28px 0;padding:22px 28px 14px"><svg id="ch" width="856" height="330" viewBox="0 0 912 330">
+    ${[40,110,180].map(y=>`<line class="gl" x1="60" y1="${y}" x2="900" y2="${y}" stroke="#fff" stroke-opacity=".12" stroke-width="1.5"/>`).join('')}
+    <line id="ax" x1="60" y1="250" x2="900" y2="250" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <line id="ay" x1="60" y1="20" x2="60" y2="250" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="0" y="16" fill="#fff" fill-opacity=".6" font-family="Inter" font-weight="600" font-size="21" letter-spacing="3.5">BALANCE</text>
+    ${[1,2,3,4,5].map((n,i)=>`<text class="yl" x="${110+i*175}" y="290" text-anchor="middle" fill="#fff" fill-opacity=".72" font-family="Inter" font-weight="600" font-size="21" letter-spacing="2.5">YEAR ${n}</text>`).join('')}
+    <path id="area" d="${CURVE} L880 250 L70 250 Z" fill="url(#areag)"/>
+    <path id="cv" class="dr" pathLength="1" d="${CURVE}" fill="none" stroke="#D4B225" stroke-width="7" stroke-linecap="round"/>
+    <circle id="dot" r="11" fill="#111634" stroke="#EBD57A" stroke-width="4"/>
+    <text x="900" y="322" text-anchor="end" fill="#fff" fill-opacity=".4" font-family="Inter" font-weight="500" font-size="17" letter-spacing="3">ILLUSTRATION ONLY</text>
+  </svg></div>`,
+  (t,r)=>{const a=T(29)-.1;label(r,t,a);lines(r,t,a+.05,.1,.7);
+    draw($(r,'#cv'),t,T(29)+.05,1.25);
+    const k=E.io(prog(t,T(29)+.05,1.25));const cv=$(r,'#cv');const L=cv.getTotalLength();const p=cv.getPointAtLength(L*k);const d=$(r,'#dot');d.setAttribute('cx',p.x);d.setAttribute('cy',p.y);d.style.opacity=clamp(prog(t,T(29)+.05,.15));
+    $(r,'#area').style.clipPath=`inset(0 ${(1-k)*100}% 0 0)`;
+    $$(r,'.yl').forEach((e,i)=>{e.style.opacity=E.out(prog(t,T(29)+.1+i*.22,.35));});
+    $(r,'.u').style.transform=`scaleX(${E.io(prog(t,T(34)-.05,.4))})`;});
+
+// =====================================================================
+// G5  HIGH-INTEREST BALANCES  -  rate gauge
+// =====================================================================
+const GC=[456,330],GR=290;
+const zones=[[180,240,'rgba(255,255,255,.30)'],[240,300,'#9C8010'],[300,360,'#D4B225']];
+const g5=G(T(39)-.25,T(42),`
+  ${LAB('Carrying')}
+  <h1 class="hd" style="font-size:58px"><span class="ln"><span>High-interest <em>balances</em></span></span></h1>
+  <div class="card" style="margin:16px -28px 0;padding:18px 28px 6px"><svg id="gz" width="856" height="396" viewBox="0 0 912 396">
+    ${zones.map(z=>`<path class="dr zn" pathLength="1" d="${arcP(GC[0],GC[1],GR,z[0],z[1])}" fill="none" stroke="${z[2]}" stroke-width="26"/>`).join('')}
+    ${Array.from({length:25},(_,i)=>{const a=180+i*7.5,[x0,y0]=pol(GC[0],GC[1],GR-30,a),[x1,y1]=pol(GC[0],GC[1],GR-(i%4===0?56:44),a);return `<line class="tk" x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#fff" stroke-opacity="${i%4===0?.7:.35}" stroke-width="${i%4===0?3:2}"/>`;}).join('')}
+    <line id="nd" x1="456" y1="330" x2="200" y2="330" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="456" cy="330" r="38" fill="#111634" stroke="#D4B225" stroke-width="3"/>
+    <image href="${RING}" x="428" y="302" width="56" height="56"/>
+    <text x="110" y="378" text-anchor="middle" fill="#fff" fill-opacity=".6" font-family="Inter" font-weight="600" font-size="22" letter-spacing="4">LOW</text>
+    <text x="802" y="378" text-anchor="middle" fill="#D4B225" font-family="Inter" font-weight="700" font-size="22" letter-spacing="4">HIGH</text>
+    <text x="456" y="394" text-anchor="middle" fill="#fff" fill-opacity=".7" font-family="Inter" font-weight="600" font-size="20" letter-spacing="4">INTEREST RATE</text>
+  </svg></div>`,
+  (t,r)=>{const a=T(39)-.25;label(r,t,a);lines(r,t,a+.05,.1,.7);
+    $$(r,'.zn').forEach((z,i)=>draw(z,t,a+.1+i*.12,.5));$$(r,'.tk').forEach((e,i)=>{e.style.opacity=E.out(prog(t,a+.15+i*.012,.25));});
+    const ang=182+ (338-182)*E.expo(prog(t,T(39)+.05,1.1));const [x,y]=pol(GC[0],GC[1],GR-62,ang);const n=$(r,'#nd');n.setAttribute('x2',x);n.setAttribute('y2',y);});
+
+// =====================================================================
+// G6  DEBT CONSOLIDATION  -  flow diagram (lines merge into one)
+// =====================================================================
+const SRC=[40,150,260];
+const g6=G(T(42),T(48)-.05,`
+  ${LAB('Combine')}
+  <h1 class="hd" style="font-size:62px"><span class="ln"><span>Debt <em>consolidation</em></span></span></h1>
+  <svg id="fl" width="912" height="310" viewBox="0 0 912 310" style="margin-top:20px">
+    ${SRC.map((y,i)=>`<g class="chip"><rect x="0" y="${y-27}" width="120" height="54" rx="9" fill="rgba(17,22,52,.9)" stroke="#fff" stroke-opacity=".4" stroke-width="1.5"/><text x="60" y="${y+7}" text-anchor="middle" fill="#fff" font-family="Inter" font-weight="600" font-size="21" letter-spacing="3">${['CARD','CARD','LOAN'][i]}</text></g>`).join('')}
+    ${SRC.map(y=>`<path class="dr rb" pathLength="1" d="M120 ${y} C 310 ${y}, 340 150, 560 150" fill="none" stroke="url(#flowg)" stroke-width="20" stroke-linecap="butt"/>`).join('')}
+    <path id="fin" class="dr" pathLength="1" d="M560 150 L 820 150" fill="none" stroke="url(#gg)" stroke-width="58"/>
+    <path id="arw" d="M820 108 L 884 150 L 820 192 Z" fill="#D4B225"/>
+    <text id="flt" x="690" y="226" text-anchor="middle" fill="#fff" fill-opacity=".85" font-family="Inter" font-weight="600" font-size="22" letter-spacing="4">CONSOLIDATED</text>
+  </svg>`,
+  (t,r)=>{const a=T(42);label(r,t,a);lines(r,t,a+.05,.1,.7);const s=T(43)-.2;
+    $$(r,'.chip').forEach((c,i)=>fade(c,t,s-.2+i*.12,.4));
+    $$(r,'.rb').forEach((p,i)=>draw(p,t,s+i*.16,.95));
+    draw($(r,'#fin'),t,s+.95,.55);const ar=$(r,'#arw');ar.style.opacity=E.out(prog(t,s+1.35,.2));ar.style.transform=`translateX(${(1-E.expo(prog(t,s+1.35,.4)))*-24}px)`;fade($(r,'#flt'),t,s+1.45,.35);});
+
+// =====================================================================
+// G7  OPTIONS  -  decision fork
+// =====================================================================
+const optBox=(n,txt,top)=>`<div class="ob" style="position:absolute;left:560px;top:${top}px;width:352px;height:150px;border:1.5px solid rgba(212,178,37,.85);border-radius:14px;background:rgba(17,22,52,.95);padding:20px 24px;box-shadow:0 20px 50px rgba(0,0,0,.45)">
+  <div class="caps" style="font-size:19px;color:#D4B225">Option ${n}</div><div style="margin-top:10px;font:600 37px/1.06 Inter;letter-spacing:-.02em;color:#fff">${txt}</div></div>`;
+const g7=G(T(48),T(58)-.05,`
+  ${LAB('Depending on your situation')}
+  <div style="position:relative;height:350px;margin-top:22px">
+    <svg width="912" height="350" viewBox="0 0 912 350" style="position:absolute;left:0;top:0">
+      <path class="dr" id="f1" pathLength="1" d="M58 175 C 230 175, 260 81, 470 81 L 560 81" fill="none" stroke="url(#gg)" stroke-width="5" stroke-linecap="round"/>
+      <path class="dr" id="f2" pathLength="1" d="M58 175 C 230 175, 260 269, 470 269 L 560 269" fill="none" stroke="url(#gg)" stroke-width="5" stroke-linecap="round"/>
+      <circle id="fn" cx="34" cy="175" r="34" fill="#111634" stroke="#D4B225" stroke-width="3"/><image href="${RING}" x="12" y="153" width="44" height="44"/>
+      <text id="fy" x="0" y="238" fill="#fff" fill-opacity=".6" font-family="Inter" font-weight="600" font-size="19" letter-spacing="3">YOUR SITUATION</text>
+      <g id="orc"><circle cx="736" cy="175" r="19" fill="#111634" stroke="#D4B225" stroke-width="2"/><text x="736" y="181" text-anchor="middle" fill="#EBD57A" font-family="Inter" font-weight="700" font-size="16" letter-spacing="1.5">OR</text></g>
+    </svg>
+    ${optBox('01','Consolidation loan',4)}${optBox('02','Mortgage-based option',196)}
+  </div>`,
+  (t,r)=>{const a=T(48);label(r,t,a);const n=$(r,'#fn');n.style.opacity=E.out(prog(t,a+.1,.4));fade($(r,'#fy'),t,a+.3,.4);
+    draw($(r,'#f1'),t,T(48)+.35,.95);const b=$$(r,'.ob');
+    const k1=E.expo(prog(t,T(53)-.15,.7));b[0].style.opacity=clamp(prog(t,T(53)-.15,.3));b[0].style.transform=`translateX(${(1-k1)*60}px)`;
+    draw($(r,'#f2'),t,T(55)-.25,.9);fade($(r,'#orc'),t,T(55)+.1,.4);
+    const k2=E.expo(prog(t,T(56)-.15,.7));b[1].style.opacity=clamp(prog(t,T(56)-.15,.3));b[1].style.transform=`translateX(${(1-k2)*60}px)`;});
+
+// =====================================================================
+// G8  RESTRUCTURE  -  calendar: scattered due dates become one
+// =====================================================================
+const CW=77,CH=54,DUE=[3,9,17,24],ONE=14;
+const cellC=d=>[((d-1)%7)*CW+CW/2,Math.floor((d-1)/7)*CH+CH/2];
+const g8=G(T(58),T(64)-.05,`
+  ${LAB('Payment dates')}
+  <h1 class="hd" style="font-size:58px"><span class="ln"><span>Restructure your <em>payments</em></span></span></h1>
+  <div style="display:flex;gap:44px;margin-top:26px;align-items:flex-start">
+    <div style="width:539px;flex:none;background:rgba(17,22,52,.94);border:1.5px solid rgba(255,255,255,.16);border-radius:14px;padding:18px 0 14px;box-shadow:0 22px 56px rgba(0,0,0,.45)">
+      <div style="display:flex;padding:0 0 12px">${'SMTWTFS'.split('').map(d=>`<span style="width:${CW}px;text-align:center;font:600 19px Inter;letter-spacing:.14em;color:#D4B225">${d}</span>`).join('')}</div>
+      <div id="cal" style="position:relative;width:539px;height:${CH*4}px;border-top:1px solid rgba(255,255,255,.14)">
+        ${Array.from({length:28},(_,i)=>`<span class="dy" style="position:absolute;left:${(i%7)*CW}px;top:${Math.floor(i/7)*CH}px;width:${CW}px;height:${CH}px;display:flex;align-items:center;justify-content:center;font:500 25px Inter;color:rgba(255,255,255,.62)">${i+1}</span>`).join('')}
+        ${DUE.map((d,i)=>{const [x,y]=cellC(d);return `<i class="mk" data-i="${i}" style="position:absolute;left:${x-22}px;top:${y-22}px;width:44px;height:44px;border-radius:50%;border:3px solid #D4B225;"></i>`}).join('')}
+        <i id="one" style="position:absolute;left:${cellC(ONE)[0]-27}px;top:${cellC(ONE)[1]-27}px;width:54px;height:54px;border-radius:50%;background:linear-gradient(145deg,#EBD57A,#D4B225);display:flex;align-items:center;justify-content:center;font:700 24px Inter;color:#111634">${ONE}</i>
+      </div>
+    </div>
+    <div style="flex:1;padding-top:6px">
+      <div class="caps" style="font-size:19px;color:rgba(255,255,255,.65)">Before</div>
+      <div style="position:relative;display:inline-block;margin-top:12px;font:600 34px/1.1 Inter;letter-spacing:-.02em;color:rgba(255,255,255,.7)">Several due dates<i id="stk" style="position:absolute;left:-4px;right:-4px;top:54%;height:3px;background:#D4B225;transform-origin:0 50%;transform:scaleX(0)"></i></div>
+      <i style="display:block;margin:30px 0 28px;height:1.5px;background:rgba(255,255,255,.18)"></i>
+      <div id="aft"><div class="caps" style="font-size:19px;color:#D4B225">After</div><div style="margin-top:12px;font:600 38px/1.08 Inter;letter-spacing:-.02em;color:#fff">One payment<br>schedule</div></div>
+    </div>
+  </div>`,
+  (t,r)=>{const a=T(58);label(r,t,a);lines(r,t,a+.05,.1,.7);
+    const cal=$(r,'#cal');cal.parentElement.style.opacity=E.out(prog(t,a+.25,.5));cal.parentElement.style.transform=`translateY(${(1-E.expo(prog(t,a+.25,.8)))*40}px)`;
+    const mk=$$(r,'.mk'),one=$(r,'#one');const m0=T(61)-.1,km=E.io(prog(t,m0,.85));const [ox,oy]=cellC(ONE);
+    mk.forEach((m,i)=>{const [x,y]=cellC(DUE[i]);const ki=E.out(prog(t,a+.5+i*.14,.4));const cx=x+(ox-x)*km,cy=y+(oy-y)*km;
+      m.style.left=(cx-22)+'px';m.style.top=(cy-22)+'px';m.style.opacity=ki*(1-clamp(prog(t,m0+.7,.2)));m.style.transform=`scale(${.4+.6*ki})`;});
+    const k1=E.expo(prog(t,m0+.7,.5));one.style.opacity=clamp(prog(t,m0+.7,.12));one.style.transform=`scale(${.5+.5*k1})`;
+    $(r,'#stk').style.transform=`scaleX(${E.io(prog(t,m0+.15,.5))})`;const af=$(r,'#aft');af.style.opacity=E.out(prog(t,m0+.7,.5));af.style.transform=`translateY(${(1-E.expo(prog(t,m0+.7,.7)))*24}px)`;});
+
+// =====================================================================
+// G9  THE GOAL  -  bars shrink (reduce) vs bars only shuffle (move around)
+// =====================================================================
+const H0=[150,100,130,70],BW=64,BG=34,BX=i=>i*(BW+BG);
+const bars=(cls,col)=>H0.map((h,i)=>`<i class="${cls}" style="position:absolute;bottom:0;left:${BX(i)}px;width:${BW}px;height:${h}px;border-radius:6px 6px 0 0;background:${col}"></i>`).join('');
+const g9=G(T(64),T(76)-.05,`
+  ${LAB('The goal')}
+  <div style="display:flex;gap:56px;margin-top:34px">
+    <div id="pa" style="flex:1">
+      <div style="display:flex;align-items:center;gap:16px"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="dr" id="g_c" pathLength="1" cx="22" cy="22" r="19" fill="none" stroke="#D4B225" stroke-width="3"/><path class="dr" id="g_p" pathLength="1" d="M12 23 L19 30 L32 15" fill="none" stroke="#EBD57A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font:600 34px/1.05 Inter;letter-spacing:-.02em;color:#fff">Reduce your debt</span></div>
+      <div style="position:relative;height:170px;margin-top:30px;width:${BX(3)+BW}px;border-bottom:2px solid rgba(255,255,255,.5)">${bars('ba','linear-gradient(180deg,#EBD57A,#D4B225)')}</div>
+    </div>
+    <div id="pb" style="flex:1">
+      <div style="display:flex;align-items:center;gap:16px"><svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3"/><path d="M14 14 L30 30 M30 14 L14 30" stroke="#fff" stroke-opacity=".55" stroke-width="4" stroke-linecap="round"/></svg>
+        <span style="position:relative;font:600 34px/1.05 Inter;letter-spacing:-.02em;color:rgba(255,255,255,.88)">Just move it around<i id="g_s" style="position:absolute;left:-4px;right:-4px;top:55%;height:3px;background:#D4B225;transform-origin:0 50%;transform:scaleX(0)"></i></span></div>
+      <div style="position:relative;height:170px;margin-top:30px;width:${BX(3)+BW}px;border-bottom:2px solid rgba(255,255,255,.5)">${bars('bb','rgba(255,255,255,.6)')}</div>
+    </div>
+  </div>`,
+  (t,r)=>{const a=T(64);label(r,t,a);
+    const pa=$(r,'#pa'),pb=$(r,'#pb');const ka=E.expo(prog(t,a+.2,.8));pa.style.opacity=clamp(prog(t,a+.2,.4));pa.style.transform=`translateY(${(1-ka)*34}px)`;
+    const tb=T(70)-.1,kb=E.expo(prog(t,tb,.8));pb.style.opacity=clamp(prog(t,tb,.4));pb.style.transform=`translateY(${(1-kb)*34}px)`;
+    // left: bars shrink while "reduce your debt" is spoken
+    $$(r,'.ba').forEach((b,i)=>{const k=E.io(prog(t,T(68)-.05+i*.08,.9));b.style.height=(H0[i]*(1-.58*k))+'px';});
+    draw($(r,'#g_c'),t,T(68)+.2,.45);draw($(r,'#g_p'),t,T(68)+.55,.35);
+    // right: same bars only swap places
+    const ks=E.io(prog(t,T(73)-.05,.9));const perm=[1,0,3,2];$$(r,'.bb').forEach((b,i)=>{const dx=(BX(perm[i])-BX(i))*ks;b.style.transform=`translateX(${dx}px)`;});
+    $(r,'#g_s').style.transform=`scaleX(${E.io(prog(t,T(75)-.1,.5))})`;});
+
+// =====================================================================
+// G10  CTA  -  Instagram-style DM composer typing the message
+// =====================================================================
+const MSG="Let's look at a smarter repayment strategy";const MW=MSG.split(' ');
+const g10=G(T(76)-.05,TL.speech_end+.05,`
+  <div style="display:flex;align-items:flex-end;gap:26px"><div class="ln" style="font:600 104px/1 Inter;letter-spacing:-.035em;color:#fff;text-shadow:0 2px 28px rgba(10,13,38,.6)"><span>DM <b style="font-weight:600;color:#D4B225">me</b></span></div>
+    <div class="ln" style="font:500 30px/1 Inter;letter-spacing:.02em;color:rgba(255,255,255,.85);padding-bottom:20px"><span>@janedoe</span></div></div>
+  <i id="c_r" style="display:block;margin-top:22px;height:1.5px;background:linear-gradient(90deg,rgba(212,178,37,.9),rgba(212,178,37,0));transform-origin:0 50%"></i>
+  <div id="cmp" style="margin-top:34px;height:112px;border-radius:999px;background:#F5F2E9;box-shadow:0 26px 60px rgba(0,0,0,.5);display:flex;align-items:center;padding:0 16px 0 20px;gap:20px">
+    <div style="width:76px;height:76px;border-radius:50%;background:#111634;display:flex;align-items:center;justify-content:center;flex:none"><img src="${RING}" style="width:50px;height:50px"></div>
+    <div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;font:500 30px/1 Inter;letter-spacing:-.01em;color:#111634"><span id="typ"></span><i id="car" style="display:inline-block;width:3px;height:34px;background:#D4B225;vertical-align:-7px;margin-left:3px"></i></div>
+    <div id="snd" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(145deg,#EBD57A,#D4B225);display:flex;align-items:center;justify-content:center;flex:none"><svg width="38" height="38" viewBox="0 0 24 24"><path d="M21.5 2.5 10.6 13.4 M21.5 2.5 14.6 21.5 10.6 13.4 2.5 9.4Z" fill="none" stroke="#111634" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>`,
+  (t,r)=>{const a=T(76)-.05;lines(r,t,a,.1,.8);$(r,'#c_r').style.transform=`scaleX(${E.io(prog(t,a+.2,.9))})`;
+    const c=$(r,'#cmp'),k=E.expo(prog(t,a+.35,.8));c.style.opacity=clamp(prog(t,a+.35,.3));c.style.transform=`translateY(${(1-k)*50}px)`;
+    // type word-by-word in sync with speech (words 79..85 = "let's look at a smarter repayment strategy")
+    let s='';for(let i=0;i<MW.length;i++){const wi=79+i;const ws=W[wi]?W[wi].s:T(85),we=W[wi]?W[wi].e:T(85)+.5;const f=clamp((t-ws)/Math.max(.05,we-ws));const w=MW[i];s+=w.slice(0,Math.ceil(w.length*f))+(f>0&&i<MW.length-1&&f>=1?' ':'');}
+    $(r,'#typ').textContent=s;$(r,'#car').style.opacity=Math.floor(t*2.4)%2?0:1;
+    const sp=prog(t,T(85)+.35,.25);$(r,'#snd').style.transform=`scale(${1+.12*Math.sin(Math.PI*sp)})`;});
+
+// =====================================================================
+// END CARD
+// =====================================================================
+const ROWS=[['Call / Text','555-555-0100'],['Email','jane@example.com'],['Instagram','@janedoe'],['Website','example.com'],['Office','1 Main St, Anytown, ON']];
+const endEl=document.createElement('div');endEl.id='end';endEl.style.cssText='position:absolute;left:0;top:0;width:1080px;height:1920px;opacity:0;visibility:hidden;overflow:hidden;background:radial-gradient(120% 80% at 50% 22%,#1C2358 0%,#111634 52%,#0A0D26 100%)';
+endEl.innerHTML=`
+  <img id="e_wm" src="${RING}" style="position:absolute;left:300px;top:760px;width:1100px;height:1100px;opacity:.07">
+  <div id="e_top" style="position:absolute;left:0;right:0;top:210px;text-align:center"><img src="brand/logo_white.png" style="width:600px;height:auto;display:inline-block"></div>
+  <i id="e_r1" style="position:absolute;left:340px;width:400px;top:520px;height:1.5px;background:linear-gradient(90deg,rgba(212,178,37,0),#D4B225,rgba(212,178,37,0));transform-origin:50% 50%"></i>
+  <div id="e_nm" style="position:absolute;left:0;right:0;top:566px;text-align:center;font:600 68px/1.05 Inter;letter-spacing:-.03em;color:#fff">Jane Doe</div>
+  <div id="e_ti" style="position:absolute;left:0;right:0;top:662px;text-align:center;font:600 21px/1.3 Inter;letter-spacing:.2em;color:#D4B225">LICENSED MORTGAGE AGENT, LEVEL 2 · LIC. #M00000000</div>
+  <div id="e_bt" style="position:absolute;left:340px;width:400px;top:738px;height:96px;border-radius:999px;background:linear-gradient(90deg,#9C8010,#EBD57A 45%,#D4B225);display:flex;align-items:center;justify-content:center;font:700 32px Inter;letter-spacing:.2em;color:#111634;box-shadow:0 20px 50px rgba(0,0,0,.4)">DM ME</div>
+  <div id="e_rows" style="position:absolute;left:96px;width:888px;top:900px">${ROWS.map(([k,v])=>`<div class="er" style="display:flex;align-items:center;gap:20px;padding:21px 0;border-bottom:1px solid rgba(255,255,255,.16)"><span style="width:200px;flex:none;font:600 19px Inter;letter-spacing:.24em;color:#D4B225;text-transform:uppercase">${k}</span><span style="font:500 29px Inter;letter-spacing:-.01em;color:#fff">${v}</span></div>`).join('')}</div>
+  <div id="e_ds" style="position:absolute;left:96px;width:888px;top:1360px;text-align:center;font:400 25px/1.4 Inter;color:rgba(255,255,255,.78)">General information only, not financial advice. Options depend on your situation and are subject to lender approval (O.A.C.).
+    <div style="margin-top:16px;font:700 21px Inter;letter-spacing:.2em;color:#D4B225">EXAMPLE MORTGAGE GROUP · BROKERAGE LIC. #00000</div></div>`;
+stage.appendChild(endEl);
+function dEnd(t){const t0=TL.speech_end-.1;const e=E.out(prog(t,t0,.45));endEl.style.visibility=e>0?'visible':'hidden';endEl.style.opacity=e;if(e<=0)return;
+  const stag=['e_top','e_r1','e_nm','e_ti','e_bt'];stag.forEach((id,i)=>{const el=$(endEl,'#'+id);const k=E.expo(prog(t,t0+.2+i*.12,.8));el.style.opacity=clamp(prog(t,t0+.2+i*.12,.35));
+    el.style.transform=id==='e_r1'?`scaleX(${k})`:`translateY(${(1-k)*28}px)`;});
+  $$(endEl,'.er').forEach((el,i)=>{const k=E.expo(prog(t,t0+.9+i*.1,.7));el.style.opacity=clamp(prog(t,t0+.9+i*.1,.3));el.style.transform=`translateY(${(1-k)*20}px)`;});
+  const ds=$(endEl,'#e_ds');ds.style.opacity=E.out(prog(t,t0+1.6,.6));
+  $(endEl,'#e_wm').style.transform=`rotate(${(t-t0)*3}deg)`;}
+
+// =====================================================================
+// CAPTIONS (unchanged)
+// =====================================================================
+const capEl=document.createElement('div');capEl.className='cap';stage.appendChild(capEl);
+const chunks=[];{let cur=[];W.forEach((w,i)=>{cur.push(i);const p=/[.,?!:]$/.test(w.w);if(cur.length>=3||p||(cur.length>=2&&W[i].w.length>11)){chunks.push(cur);cur=[];}});if(cur.length)chunks.push(cur);}
+const back=x=>{x=clamp(x);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);};
+function dcap(t){if(t>=TL.speech_end+0.05){capEl.style.opacity=0;return;}capEl.style.opacity=1;
+  let ci=-1;for(let k=0;k<chunks.length;k++){const s=W[chunks[k][0]].s-0.04;const nx=k+1<chunks.length?W[chunks[k+1][0]].s-0.04:TL.speech_end+0.05;if(t>=s&&t<nx){ci=k;break;}}
+  if(ci<0){capEl.innerHTML='';return;}
+  const ch=chunks[ci];const st=W[ch[0]].s-0.04;const k=back(prog(t,st,.18));
+  capEl.style.transform=`scale(${0.88+0.12*k})`;
+  capEl.innerHTML=ch.map(i=>{const on=t>=W[i].s-0.03&&(t<W[i].e||i===ch[ch.length-1]);const txt=W[i].w.replace(/[.,?!:]$/,'').replace(/^Here's$/,"HERE'S");
+    const sc=on?1.08:1;return `<span class="${on?'on':''}" style="transform:scale(${sc})">${txt}</span>`;}).join('');}
+
+// =====================================================================
+function seek(t){let sc=0;
+  gs.forEach(g=>{const inn=E.out(prog(t,g.a,g.din)),out=prog(t,g.b-g.dout,g.dout);const op=Math.min(inn,1-out);
+    if(t<g.a||t>g.b||op<=0){g.root.style.visibility='hidden';g.root.style.opacity=0;return;}
+    g.root.style.visibility='visible';g.root.style.opacity=op;g.root.style.transform=`translateY(${-14*E.io(out)}px)`;g.upd(t,g.root);if(g.scrim)sc=Math.max(sc,op);});
+  scrim.style.opacity=Math.min(1,sc);dEnd(t);dcap(t);}
+window.seek=seek;seek(0);
+</script></body></html>

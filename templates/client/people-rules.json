@@ -1,0 +1,4 @@
+{
+  "_comment": "Rules for who or what may appear in B-roll for this client (ghost-editor format). Leave empty unless the client asked for a rule. Never add rules the client did not ask for.",
+  "rules": []
+}

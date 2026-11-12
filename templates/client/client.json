@@ -1,0 +1,38 @@
+{
+  "slug": "CLIENT-SLUG",
+  "display_name": "CLIENT DISPLAY NAME",
+  "status": "onboarding",
+  "people": [
+    {
+      "name": "ON-CAMERA PERSON NAME",
+      "role": "e.g. Licensed Mortgage Agent, Level 2",
+      "licence_no": "AGENT LICENCE NUMBER",
+      "pronouns_in_copy": "they/them unless the client says otherwise",
+      "face_reference": "assets/people/NAME.jpg (one clear photo so the agent can confirm the right person in raw footage)"
+    }
+  ],
+  "company": {
+    "legal_name": "BROKERAGE / COMPANY LEGAL NAME",
+    "brokerage_licence_no": "BROKERAGE LICENCE NUMBER",
+    "regulator": "e.g. FSRA (Ontario), BCFSA (British Columbia), NMLS (US)",
+    "jurisdiction": "province / state this client may advertise in",
+    "office_address": "",
+    "website": "",
+    "phone": "",
+    "email": ""
+  },
+  "social": {
+    "instagram": "",
+    "tiktok": "",
+    "youtube": "",
+    "facebook": "",
+    "linkedin": ""
+  },
+  "audience": "who the reels are for (first-time buyers, refinancers, investors, newcomers...)",
+  "languages": ["en"],
+  "platforms": ["instagram-reels"],
+  "default_cta": "e.g. DM me",
+  "needs_confirmation": [
+    "list anything copied from an old kit or website that the client has not confirmed yet"
+  ]
+}

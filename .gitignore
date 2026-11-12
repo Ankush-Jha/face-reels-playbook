@@ -1,0 +1,21 @@
+# media and heavy artifacts never go in this repo
+*.mp4
+*.mov
+*.webm
+*.wav
+*.m4a
+*.mp3
+frames*/
+*.zip
+tools/models/
+library/photos/
+library/cutouts/
+library/textures/
+vendor/
+.venv/
+__pycache__/
+.DS_Store
+# secrets
+.env
+*.env
+*.key

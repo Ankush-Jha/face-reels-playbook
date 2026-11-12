@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  @font-face{font-family:'PF';src:url('../../../../../library/fonts/playfair-display-latin.woff2');font-weight:400 900;font-style:normal}
+  @font-face{font-family:'PF';src:url('../../../../../library/fonts/playfair-display-italic-latin.woff2');font-weight:400 900;font-style:italic}
+  :root{--navy:#111634;--navy2:#1A2150;--deep:#0A0D26;--gold:#D4B225;--goldhi:#EBD57A;--goldlo:#9C8010;--ivory:#F5F2E9;--kraft:#C9AE82;
+    --tex-paper:url('../../../../../library/textures/Paper001/Paper001_1K-JPG_Color.jpg');--tex-kraft:url('../../../../../library/textures/Cardboard002/Cardboard002_1K-JPG_Color.jpg')}
+  *{box-sizing:border-box}
+  html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden;font-family:'Inter','Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  #stage{position:absolute;left:0;top:0;width:1080px;height:1920px}
+  #scrim{position:absolute;left:0;top:0;width:1080px;height:760px;opacity:0;background:linear-gradient(180deg,rgba(10,13,38,.62) 0%,rgba(10,13,38,.34) 55%,rgba(10,13,38,0) 100%)}
+  #scrimB{position:absolute;left:0;top:1240px;width:1080px;height:680px;background:linear-gradient(0deg,rgba(10,13,38,.62) 0%,rgba(10,13,38,.30) 55%,rgba(10,13,38,0) 100%)}
+  #tone{position:absolute;left:0;top:0;width:1080px;height:1920px;background:#0A0D26;opacity:0}
+  .g{position:absolute;left:0;top:0;width:1080px;height:1920px;visibility:hidden}
+  .abs{position:absolute}
+  /* one light source (top-left): contact shadow + soft ambient shadow, on every physical object */
+  .lift{filter:drop-shadow(1px 2px 1.5px rgba(8,10,30,.55)) drop-shadow(9px 16px 15px rgba(8,10,30,.40))}
+  .sticker{filter:url(#sticker) drop-shadow(1px 2px 1.5px rgba(8,10,30,.5)) drop-shadow(9px 16px 15px rgba(8,10,30,.42))}
+  /* real scanned paper (ambientCG CC0) multiplied over a flat colour */
+  .paper{--bc:#F5F2E9;--bi:var(--tex-paper);--bm:multiply}
+  .kraft{--bc:#EAD9B6;--bi:var(--tex-kraft);--bm:multiply}
+  .navypaper{--bc:#161C45;--bi:var(--tex-paper);--bm:multiply}
+  .paper:not(.cut),.kraft:not(.cut),.navypaper:not(.cut){background-color:var(--bc);background-image:var(--bi);background-size:cover;background-blend-mode:var(--bm)}
+  .cut::before{content:'';position:absolute;inset:0;z-index:-1;clip-path:var(--clip);background-color:var(--bc);background-image:var(--bi);background-size:cover;background-blend-mode:var(--bm)}
+  .tape{position:absolute;width:150px;height:46px;background:rgba(245,242,233,.62);box-shadow:0 1px 3px rgba(8,10,30,.25);
+    clip-path:polygon(0 8%,3% 0,6% 10%,9% 0,12% 9%,100% 0,97% 12%,100% 25%,96% 38%,100% 52%,97% 66%,100% 80%,96% 92%,100% 100%,0 92%,3% 80%,0 66%,4% 52%,0 38%,3% 25%)}
+  .pf{font-family:'PF','Playfair Display',Georgia,serif}
+  .hand{font-family:'Caveat','Marker Felt',cursive}
+  svg{display:block;overflow:visible}
+  .cap{position:absolute;left:70px;right:70px;bottom:396px;text-align:center;font:800 68px/1.1 Inter;letter-spacing:-.015em;color:#fff;
+       text-shadow:0 3px 26px rgba(10,13,38,.95),0 1px 3px rgba(10,13,38,.9)}
+  .cap span{display:inline-block;margin:0 .22em}
+  .cap span.on{color:var(--gold)}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <!-- die-cut sticker: white paper border grown from the object's own silhouette, slightly irregular -->
+  <filter id="sticker" x="-14%" y="-14%" width="128%" height="128%">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="10" result="d"/><feGaussianBlur in="d" stdDeviation="1.3" result="db"/>
+    <feFlood flood-color="#F8F5EC"/><feComposite in2="db" operator="in" result="w"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="5" result="n"/><feDisplacementMap in="w" in2="n" scale="4" result="wd"/>
+    <feMerge><feMergeNode in="wd"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <!-- rubber-stamp ink: speckled, uneven -->
+  <filter id="ink" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="8" result="t"/>
+    <feColorMatrix in="t" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.55" result="m"/>
+    <feComposite in="SourceGraphic" in2="m" operator="in" result="s"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="1" seed="2" result="w"/><feDisplacementMap in="s" in2="w" scale="3"/></filter>
+</defs></svg>
+<div id="stage"><div id="tone"></div><div id="scrim"></div></div>
+<script src="../../../../../library/js/rough.js"></script>
+<script>
+const PLAN=__PLAN__, CLIENT=__CLIENT__, BRAND=__BRAND__, COMPL=__COMPLIANCE__;
+const W=PLAN.words, T=i=>W[i].s, TE=i=>W[i].e;
+const stage=document.getElementById('stage'), scrim=document.getElementById('scrim'), tone=document.getElementById('tone');
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), prog=(t,a,d)=>clamp((t-a)/d);
+const E={out:x=>1-Math.pow(1-clamp(x),4),expo:x=>{x=clamp(x);return x>=1?1:1-Math.pow(2,-10*x)},io:x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2},
+  slam:x=>{x=clamp(x);return x<.3?1.8-(.8*x/.3):1+Math.exp(-10*(x-.3))*Math.sin(30*(x-.3))*.04}};
+const $=(n,s)=>n.querySelector(s),$$=(n,s)=>[...n.querySelectorAll(s)];
+const ASSET='../../../../../library/', RING='../../../brand/ring.png', P0=CLIENT.people[0], CO=CLIENT.company;
+const step12=t=>Math.floor(t*12)/12;
+const hash=(n)=>{const s=Math.sin(n*127.1+311.7)*43758.5453;return s-Math.floor(s)};
+const gs=[];
+function G(a,b,html,upd,o={}){const r=document.createElement('div');r.className='g';r.innerHTML=html;stage.appendChild(r);gs.push({r,a,b,upd,din:o.din??.01,dout:o.dout??.25,scrim:o.scrim!==false,out:o.out||'cut'});return r;}
+/* arrival: decelerates from oversize (most travel in the first frames, long tail, no bounce) */
+function arrive(el,t,a,o={}){const k=E.expo(prog(t,a,o.d||.55)),k2=E.out(prog(t,a,(o.d||.55)*1.4));
+  const s=1+((o.s0||1.7)-1)*(1-k2), x=(o.dx||0)*(1-k), y=(o.dy||0)*(1-k), r=(o.r1??0)+((o.r0??0)-(o.r1??0))*(1-k2);
+  el.style.opacity=t>=a?1:0; el.style.transform=`translate(${x}px,${y}px) rotate(${r}deg) scale(${s})`;}
+/* stop-motion boil: tiny random wobble that changes 12x per second, on top of any transform */
+function boil(root,t){$$(root,'.boil').forEach((e,i)=>{const n=Math.floor(t*12)*7+i*13;e.style.translate=`${(hash(n)-.5)*2.2}px ${(hash(n+3)-.5)*2.2}px`;e.style.rotate=`${(hash(n+5)-.5)*.9}deg`;});}
+/* rough.js hand-drawn shapes, drawn on over time */
+const SVGNS='http://www.w3.org/2000/svg';
+function roughLayer(root,sel,build){const svg=$(root,sel);const rc=rough.svg(svg);const items=build(rc,svg);return items;}
+function prep(node){const ps=node.querySelectorAll('path');ps.forEach(p=>{const L=p.getTotalLength()||1;p._L=L;p.style.strokeDasharray=L;p.style.strokeDashoffset=L;});return [...ps];}
+function drawOn(ps,t,a,d){const k=E.io(prog(t,a,d));ps.forEach(p=>p.style.strokeDashoffset=p._L*(1-k));}
+function wipe(el,t,a,d,dir='x'){const k=E.io(prog(t,a,d));el.style.clipPath=dir==='x'?`inset(-10% ${100-100*k}% -10% -2%)`:`inset(-2% -2% ${100-100*k}% -2%)`;}
+const tornEdge=(w,h,seed,amp=9,bottom=true,top=false)=>{const pts=[];const n=Math.round(w/14);
+  for(let i=0;i<=n;i++)pts.push(`${(i/n*100).toFixed(2)}% ${top?(hash(seed+i)*amp).toFixed(1):0}px`);
+  for(let i=n;i>=0;i--)pts.push(`${(i/n*100).toFixed(2)}% calc(100% - ${bottom?(hash(seed+50+i)*amp).toFixed(1):0}px)`);
+  return `polygon(${pts.join(',')})`;};
+
+// ===================================================================================
+// B1  "Own a home but struggling with expensive credit card balances?"
+//     die-cut photo stickers (keys + model house), paper credit cards, rubber stamp
+// ===================================================================================
+const CARDS=[['navypaper','#1A2150',9,0],['','#D4B225',-5,1],['paper','#F5F2E9',3,2]];
+const cardHTML=(cls,col,i)=>`<div class="card${i} lift abs boil" style="width:330px;height:208px;border-radius:22px;overflow:hidden;background-color:${col};background-image:var(--tex-paper);background-blend-mode:multiply">
+   <i style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(255,255,255,0) 42%,rgba(0,0,0,.12))"></i>
+   <i style="position:absolute;left:0;right:0;top:38px;height:40px;background:rgba(10,13,38,${i==2?.86:.72})"></i>
+   <i style="position:absolute;left:30px;bottom:40px;width:64px;height:50px;border-radius:10px;background:linear-gradient(135deg,#F2DC7A,#B8941C 55%,#EBD57A);box-shadow:inset 0 0 0 2px rgba(80,60,0,.35)"></i>
+   <i style="position:absolute;right:30px;bottom:38px;width:86px;height:10px;border-radius:5px;background:rgba(10,13,38,.28)"></i><i style="position:absolute;right:30px;bottom:58px;width:54px;height:10px;border-radius:5px;background:rgba(10,13,38,.2)"></i></div>`;
+const g1=G(T(0)-.05,T(10)-.05,`
+  <img class="abs sticker boil" id="ky" src="${ASSET}cutouts/keys_tag.png" style="left:40px;top:318px;width:330px">
+  <div class="abs" id="cs" style="left:690px;top:300px;width:380px;height:330px">${CARDS.map((c,i)=>`<div class="abs" style="left:${[10,40,20][i]}px;top:${[0,62,128][i]}px">${cardHTML(c[0],c[1],i)}</div>`).join('')}</div>
+  <div class="abs lift boil" id="st" style="left:668px;top:520px;width:380px;height:112px;background:#F5F2E9;background-image:var(--tex-paper);background-blend-mode:multiply;border-radius:6px;display:flex;align-items:center;justify-content:center">
+     <div style="width:352px;height:88px;border:5px double #111634;border-radius:4px;display:flex;align-items:center;justify-content:center;font:900 52px/1 Inter;letter-spacing:.1em;color:#111634;filter:url(#ink)">EXPENSIVE</div></div>`,
+ (t,r)=>{const a=T(0)-.05;
+   arrive($(r,'#ky'),t,a,{dx:-360,dy:-300,s0:1.9,r0:-34,r1:-7});
+   [0,1,2].forEach(i=>{const e=$(r,'.card'+i).parentElement;arrive(e,t,T(6)-.1+i*.16,{dx:520,dy:-80,s0:1.6,r0:30,r1:0});});
+   const k=E.slam(prog(t,T(8)+.1,.55));const st=$(r,'#st');st.style.opacity=t>=T(8)+.1?1:0;st.style.transform=`rotate(-8deg) scale(${k})`;
+   boil(r,t);},{out:'cut'});
+
+// ===================================================================================
+// B2  identity: a printed business card (paper), serif name
+// ===================================================================================
+const g2=G(T(10)-.1,T(18)+.1,`
+  <div class="abs lift boil paper" id="bc" style="left:30px;top:1284px;width:540px;height:150px;border-radius:5px">
+    <img src="${RING}" style="position:absolute;left:24px;top:34px;width:84px;height:84px">
+    <div class="pf" style="position:absolute;left:128px;top:24px;font-size:42px;font-weight:700;letter-spacing:-.01em;color:#111634;line-height:1.05;white-space:nowrap">${P0.name}</div>
+    <div style="position:absolute;left:130px;top:80px;width:400px;height:2px;background:linear-gradient(90deg,#D4B225,rgba(212,178,37,0))"></div>
+    <div style="position:absolute;left:130px;top:92px;font:600 22px/1.25 Inter;color:rgba(17,22,52,.82)">${P0.role}</div>
+    <div style="position:absolute;left:130px;top:124px;font:600 19px/1 Inter;letter-spacing:.06em;color:#8A6E10">${CO.legal_name}</div></div>`,
+ (t,r)=>{const a=T(10)-.1;arrive($(r,'#bc'),t,a,{dx:-620,dy:0,s0:1.25,r0:-6,r1:-2,d:.6});boil(r,t);},{scrim:false});
+
+// ===================================================================================
+// B3  "Depending on your qualification, you may be able": taped kraft slip, hand highlight + circle
+// ===================================================================================
+const g3=G(T(19)-.1,T(27)-.05,`
+  <div class="abs lift kraft boil cut" id="slip" style="left:412px;top:280px;width:630px;height:268px;border-radius:4px;--clip:${tornEdge(630,268,3,7,true,true)}">
+    <div class="hand" style="position:absolute;left:36px;top:30px;font-size:80px;line-height:.98;color:#111634;font-weight:700;white-space:nowrap">Depending on your<br><span id="q" style="display:inline-block">qualification</span></div>
+    <svg id="rs" class="abs" style="left:0;top:0" width="630" height="268"></svg></div>
+  <div class="tape boil" style="left:640px;top:262px;transform:rotate(-4deg)"></div>`,
+ (t,r)=>{const a=T(19)-.1;arrive($(r,'#slip'),t,a,{dx:360,dy:-120,s0:1.5,r0:22,r1:3.5,d:.6});boil(r,t);
+   if(!r._rough){r._rough=1;const svg=$(r,'#rs');const rc=rough.svg(svg);
+     const q=$(r,'#q'),qx=36+q.offsetLeft,qy=30+q.offsetTop,qw=q.offsetWidth,qh=q.offsetHeight;
+     const hl=rc.rectangle(qx-6,qy+qh*.28,qw+12,qh*.62,{fill:'rgba(212,178,37,.78)',fillStyle:'solid',stroke:'none',roughness:2,seed:4});svg.insertBefore(hl,svg.firstChild);r._hl=hl;
+     const ci=rc.ellipse(qx+qw/2,qy+qh*.58,qw+44,qh*1.02,{stroke:'#111634',strokeWidth:5,roughness:2,bowing:2,seed:9});svg.appendChild(ci);r._ci=prep(ci);}
+   r._hl.style.clipPath=`inset(0 ${100-100*E.io(prog(t,T(22)-.5,.5))}% 0 0)`;drawOn(r._ci,t,T(22)-.05,.55);});
+
+// ===================================================================================
+// B4  consolidate options: kraft sheet, rough marker diagram, handwriting
+// ===================================================================================
+const g4=G(T(27)-.05,T(41)-.05,`
+  <div class="abs lift kraft boil cut" id="sheet" style="left:44px;top:262px;width:992px;height:372px;transform-origin:50% 0;--clip:${tornEdge(992,372,11,12,true,false)}">
+    <svg id="dg" class="abs" style="left:0;top:0" width="992" height="372"></svg>
+    <div class="hand abs" id="d0" style="left:56px;top:84px;width:380px;text-align:center;font-size:60px;line-height:.9;white-space:nowrap;color:#111634;font-weight:700">Credit card debt</div>
+    <div class="hand abs" id="d1" style="left:600px;top:44px;width:360px;text-align:center;font-size:72px;color:#111634;font-weight:700">Refinancing</div>
+    <div class="hand abs" id="d2" style="left:556px;top:206px;width:388px;text-align:center;font-size:58px;line-height:.92;color:#111634;font-weight:700">Home equity line of credit</div></div>
+  <div class="tape boil" style="left:120px;top:246px;transform:rotate(-8deg)"></div><div class="tape boil" style="left:830px;top:244px;transform:rotate(7deg)"></div>`,
+ (t,r)=>{const a=T(27)-.05;arrive($(r,'#sheet'),t,a,{dx:0,dy:-420,s0:1.0,r0:-3,r1:-.8,d:.6});boil(r,t);
+   if(!r._rough){r._rough=1;const svg=$(r,'#dg');const rc=rough.svg(svg);const o={stroke:'#111634',strokeWidth:5,roughness:1.8,bowing:1.6};
+     const add=(n)=>{svg.appendChild(n);return prep(n);};
+     r._b0=add(rc.rectangle(38,56,396,132,{...o,seed:3}));
+     r._a1=add(rc.curve([[436,122],[500,116],[540,86],[590,80]],{...o,seed:5,strokeWidth:6,stroke:'#8A6E10'}));
+     r._h1=add(rc.linearPath([[560,52],[596,80],[564,108]],{...o,seed:6,strokeWidth:6,stroke:'#8A6E10'}));
+     r._b1=add(rc.rectangle(584,34,380,112,{...o,seed:8}));
+     r._a2=add(rc.curve([[436,150],[490,200],[500,280],[548,290]],{...o,seed:12,strokeWidth:6,stroke:'#8A6E10'}));
+     r._h2=add(rc.linearPath([[520,266],[556,290],[522,316]],{...o,seed:13,strokeWidth:6,stroke:'#8A6E10'}));
+     r._b2=add(rc.rectangle(540,196,420,148,{...o,seed:15}));}
+   drawOn(r._b0,t,T(29)-.2,.7);wipe($(r,'#d0'),t,T(30)-.1,.7);
+   drawOn(r._a1,t,T(33)-.1,.5);drawOn(r._h1,t,T(33)+.35,.2);drawOn(r._b1,t,T(34)-.2,.6);wipe($(r,'#d1'),t,T(34)+.1,.7);
+   drawOn(r._a2,t,T(35),.55);drawOn(r._h2,t,T(35)+.5,.2);drawOn(r._b2,t,T(36)-.15,.7);wipe($(r,'#d2'),t,T(37)-.1,.9);});
+
+// ===================================================================================
+// B5  "could potentially reduce your interest costs": paper strips, serif display, marker arrow
+// ===================================================================================
+const g5=G(T(41)-.05,T(48)-.05,`
+  <div class="abs lift paper boil cut" id="s1" style="left:56px;top:292px;width:560px;height:98px;--clip:${tornEdge(560,98,21,6,true,true)}"><div class="pf" style="position:absolute;left:36px;top:10px;font-size:60px;font-style:italic;font-weight:500;color:#111634;white-space:nowrap">could potentially</div></div>
+  <div class="abs lift navypaper boil cut" id="s2" style="left:150px;top:396px;width:640px;height:232px;--clip:${tornEdge(640,232,31,8,true,true)}"><div class="pf" style="position:absolute;left:34px;top:-18px;font-size:196px;font-style:italic;font-weight:800;color:#F5F2E9;letter-spacing:-.02em;white-space:nowrap">reduce</div></div>
+  <div class="abs lift paper boil cut" id="s3" style="left:420px;top:590px;width:560px;height:96px;--clip:${tornEdge(560,96,41,6,true,true)}"><div style="position:absolute;left:30px;top:16px;font:800 52px/1.1 Inter;letter-spacing:-.02em;color:#111634;white-space:nowrap">your <span style="color:#8A6E10">interest costs</span></div></div>
+  <svg id="ar" class="abs" style="left:700px;top:330px" width="330" height="300"></svg>`,
+ (t,r)=>{const a=T(41)-.05;arrive($(r,'#s1'),t,a,{dx:-420,dy:0,s0:1.3,r0:-6,r1:-2,d:.5});
+   arrive($(r,'#s2'),t,T(44)-.15,{dx:520,dy:-30,s0:1.5,r0:10,r1:-1.2,d:.55});arrive($(r,'#s3'),t,T(45),{dx:420,dy:60,s0:1.3,r0:6,r1:1.6,d:.5});boil(r,t);
+   if(!r._rough){r._rough=1;const svg=$(r,'#ar');const rc=rough.svg(svg);const o={stroke:'#D4B225',strokeWidth:11,roughness:1.7,bowing:1.5};
+     r._p1=(()=>{const n=rc.curve([[250,10],[300,90],[240,190],[120,250]],{...o,seed:3});svg.appendChild(n);return prep(n);})();
+     r._p2=(()=>{const n=rc.linearPath([[170,226],[116,252],[140,184]],{...o,seed:4});svg.appendChild(n);return prep(n);})();}
+   drawOn(r._p1,t,T(46)-.05,.55);drawOn(r._p2,t,T(46)+.45,.25);});
+
+// ===================================================================================
+// B6  "moving unsecured debt into borrowing secured against your home"
+//     unsecured slip slides under the model house; keys land on it; stamp
+// ===================================================================================
+const g6=G(T(48)-.05,T(60)-.05,`
+  <img class="abs sticker boil" id="h6" src="${ASSET}cutouts/model_house.png" style="left:640px;top:268px;width:330px">
+  <div class="abs lift kraft boil cut" id="u6" style="left:60px;top:392px;width:420px;height:190px;border-radius:4px;--clip:${tornEdge(420,190,51,7,true,true)}">
+     <div class="abs" style="inset:14px;border:4px dashed rgba(17,22,52,.8);border-radius:3px"></div>
+     <div class="abs" style="left:0;right:0;top:36px;text-align:center;font:900 54px/1 Inter;letter-spacing:.01em;color:#111634">UNSECURED</div>
+     <div class="pf abs" style="left:0;right:0;top:104px;text-align:center;font:italic 600 50px/1 PF;color:#111634">debt</div></div>
+  <img class="abs sticker boil" id="k6" src="${ASSET}cutouts/keys_tag.png" style="left:600px;top:360px;width:240px">
+  <div class="abs lift boil" id="r6" style="left:96px;top:600px;width:888px;height:92px;background:#111634;background-image:var(--tex-paper);background-blend-mode:soft-light;border-radius:4px;display:flex;align-items:center;justify-content:center;gap:18px">
+     <i style="width:60px;height:2px;background:#D4B225"></i><div class="pf" style="font-size:44px;font-weight:700;font-style:italic;color:#F5F2E9;letter-spacing:.02em">Secured against your home</div><i style="width:60px;height:2px;background:#D4B225"></i></div>`,
+ (t,r)=>{const a=T(48)-.05;arrive($(r,'#h6'),t,a,{dx:360,dy:-200,s0:1.5,r0:18,r1:4,d:.6});
+   arrive($(r,'#u6'),t,T(52)-.35,{dx:-520,dy:30,s0:1.2,r0:-16,r1:-3,d:.55});
+   const mv=E.io(prog(t,T(54)-.05,.8));const u=$(r,'#u6');u.style.translate=`${mv*430}px ${mv*-34}px`;u.style.opacity=1-E.io(prog(t,T(55)+.5,.3));
+   arrive($(r,'#k6'),t,T(56)-.1,{dx:90,dy:-300,s0:1.7,r0:40,r1:-6,d:.42});
+   const kk=E.slam(prog(t,T(57)-.05,.5));const rb=$(r,'#r6');rb.style.opacity=t>=T(57)-.05?1:0;rb.style.transform=`scale(${.9+.1*kk}) rotate(-1deg)`;boil(r,t);});
+
+// ===================================================================================
+// B7  "That's a serious decision, and it needs a proper repayment plan."
+// ===================================================================================
+const g7=G(T(60)-.05,T(71)-.1,`
+  <div class="abs pf" id="sd" style="left:70px;top:290px;width:940px;text-align:center;font-size:150px;line-height:.98;font-weight:800;letter-spacing:-.025em;color:#F5F2E9;text-shadow:0 4px 34px rgba(10,13,38,.7)">A <span style="font-style:italic;color:#D4B225">serious</span><br>decision.</div>
+  <div class="abs lift paper boil cut" id="nt" style="left:44px;top:560px;width:330px;height:300px;border-radius:3px;--clip:${tornEdge(330,300,61,7,true,true)}">
+     <div class="hand abs" style="left:26px;top:20px;font-size:60px;line-height:.95;color:#111634;font-weight:700">Repayment<br>plan</div>
+     <svg id="tk" class="abs" style="left:0;top:0" width="330" height="300"></svg></div>
+  <img class="abs sticker boil" id="cl" src="${ASSET}cutouts/calculator.png" style="left:722px;top:560px;width:318px">`,
+ (t,r)=>{const a=T(60)-.05;const sd=$(r,'#sd');const k=E.expo(prog(t,a,.8));const out=E.io(prog(t,T(66)-.25,.4));
+   sd.style.opacity=(t>=a?1:0)*(1-out);sd.style.transform=`translateY(${(1-k)*60}px) scale(${1+.25*(1-E.out(prog(t,a,.9)))})`;
+   arrive($(r,'#nt'),t,T(66)-.2,{dx:-420,dy:80,s0:1.3,r0:-14,r1:-4,d:.55});arrive($(r,'#cl'),t,T(67)-.1,{dx:420,dy:100,s0:1.5,r0:30,r1:8,d:.55});boil(r,t);
+   if(!r._rough){r._rough=1;const svg=$(r,'#tk');const rc=rough.svg(svg);
+     const bx=rc.rectangle(200,190,84,84,{stroke:'#111634',strokeWidth:5,roughness:1.6,seed:2});svg.appendChild(bx);r._bx=prep(bx);
+     const ck=rc.linearPath([[208,234],[236,262],[300,170]],{stroke:'#8A6E10',strokeWidth:11,roughness:1.5,seed:6});svg.appendChild(ck);r._ck=prep(ck);}
+   drawOn(r._bx,t,T(69)-.1,.4);drawOn(r._ck,t,T(70)-.2,.35);});
+
+// ===================================================================================
+// B8  "Message me and let's review whether consolidation actually makes financial sense for you."
+// ===================================================================================
+const MSG="Let's review whether consolidation actually makes financial sense for you.";const MW=MSG.split(' ');
+const PLANE=`<svg id="pl" class="abs" width="260" height="190" viewBox="0 0 260 190" style="left:0;top:300px"><polygon points="8,96 252,8 150,182 118,118" fill="#F5F2E9"/><polygon points="8,96 118,118 252,8" fill="#E2DCCB"/><polygon points="118,118 150,182 134,128" fill="#CFC8B3"/><polyline points="8,96 252,8 150,182 118,118 8,96" fill="none" stroke="#111634" stroke-width="2.5" stroke-linejoin="round" opacity=".55"/></svg>`;
+const g8=G(T(71)-.05,PLAN.speech_end+.05,`
+  ${PLANE}
+  <div class="abs lift paper boil cut" id="msg" style="left:78px;top:296px;width:924px;height:330px;border-radius:4px;--clip:${tornEdge(924,330,71,8,true,true)}">
+    <img src="${RING}" style="position:absolute;right:30px;top:24px;width:64px;height:64px;opacity:.9">
+    <div class="pf" id="mt" style="position:absolute;left:44px;top:38px;width:760px;font-size:56px;line-height:1.16;font-style:italic;font-weight:500;color:#111634"></div></div>`,
+ (t,r)=>{const a=T(71)-.05;const f=E.io(prog(t,a,1.15));const pl=$(r,'#pl');pl.style.opacity=t>=a&&f<1?1:0;
+   pl.style.transform=`translate(${-300+f*1500}px,${Math.sin(f*Math.PI)*-70+f*110}px) rotate(${-8+f*14}deg)`;
+   arrive($(r,'#msg'),t,T(72),{dx:0,dy:-260,s0:1.12,r0:-6,r1:-1.6,d:.6});boil(r,t);
+   let s='';for(let i=0;i<MW.length;i++){const wi=74+i;const on=t>=T(wi)-.02;s+=on?`<span style="display:inline-block;opacity:${E.out(prog(t,T(wi)-.02,.18))};transform:translateY(${(1-E.expo(prog(t,T(wi)-.02,.3)))*14}px)">${MW[i]}</span> `:'';}
+   $(r,'#mt').innerHTML=s;});
+
+// ===================================================================================
+// END CARD (generated from client.json / brand.json / compliance.json)
+// ===================================================================================
+const ROWS=[['Call / Text',CO.phone],['Email',CO.email],['Instagram',CLIENT.social.instagram],['Website',CO.website],['Office',CO.office_address]].filter(x=>x[1]);
+const endEl=document.createElement('div');endEl.id='end';
+endEl.style.cssText='position:absolute;left:0;top:0;width:1080px;height:1920px;opacity:0;visibility:hidden;overflow:hidden;background:radial-gradient(120% 80% at 50% 22%,#1C2358 0%,var(--navy) 52%,var(--deep) 100%)';
+endEl.innerHTML=`
+  <div style="position:absolute;inset:0;background-image:var(--tex-paper);background-size:cover;mix-blend-mode:soft-light;opacity:.5"></div>
+  <img id="e_wm" src="${RING}" style="position:absolute;left:300px;top:760px;width:1100px;height:1100px;opacity:.07">
+  <div id="e_top" style="position:absolute;left:0;right:0;top:210px;text-align:center"><img src="../../../brand/logo_white.png" style="width:600px;height:auto;display:inline-block"></div>
+  <i id="e_r1" style="position:absolute;left:340px;width:400px;top:520px;height:1.5px;background:linear-gradient(90deg,rgba(212,178,37,0),#D4B225,rgba(212,178,37,0));transform-origin:50% 50%"></i>
+  <div id="e_nm" class="pf" style="position:absolute;left:0;right:0;top:560px;text-align:center;font-size:74px;font-weight:700;line-height:1.05;letter-spacing:-.01em;color:#fff">${P0.name}</div>
+  <div id="e_ti" style="position:absolute;left:0;right:0;top:662px;text-align:center;font:600 23px/1.3 Inter;letter-spacing:.14em;color:#D4B225">${P0.role.toUpperCase()} · LIC. #${P0.licence_no}</div>
+  <div id="e_bt" style="position:absolute;left:340px;width:400px;top:738px;height:96px;border-radius:999px;background:linear-gradient(90deg,#9C8010,#EBD57A 45%,#D4B225);display:flex;align-items:center;justify-content:center;font:700 32px Inter;letter-spacing:.2em;color:#111634;box-shadow:0 20px 50px rgba(0,0,0,.4)">${(CLIENT.default_cta||'DM me').toUpperCase()}</div>
+  <div id="e_rows" style="position:absolute;left:96px;width:888px;top:900px">${ROWS.map(([k,v])=>`<div class="er" style="display:flex;align-items:center;gap:20px;padding:21px 0;border-bottom:1px solid rgba(255,255,255,.16)"><span style="width:200px;flex:none;font:600 19px Inter;letter-spacing:.2em;color:#D4B225;text-transform:uppercase">${k}</span><span style="font:500 29px Inter;letter-spacing:-.01em;color:#fff">${v}</span></div>`).join('')}</div>
+  <div id="e_ds" style="position:absolute;left:96px;width:888px;top:1360px;text-align:center;font:400 ${Math.max(25,COMPL.min_disclaimer_px_at_1080w||24)}px/1.4 Inter;color:rgba(255,255,255,.8)">${COMPL.require_disclaimer}
+    <div style="margin-top:16px;font:700 21px Inter;letter-spacing:.14em;color:#D4B225">${CO.legal_name.toUpperCase()} · BROKERAGE LIC. #${CO.brokerage_licence_no}</div></div>`;
+stage.appendChild(endEl);
+function dEnd(t){const t0=PLAN.speech_end-.05;const e=E.out(prog(t,t0,.4));endEl.style.visibility=e>0?'visible':'hidden';endEl.style.opacity=e;if(e<=0)return;
+  ['e_top','e_r1','e_nm','e_ti','e_bt'].forEach((id,i)=>{const el=$(endEl,'#'+id);const k=E.expo(prog(t,t0+.15+i*.1,.7));el.style.opacity=clamp(prog(t,t0+.15+i*.1,.3));el.style.transform=id==='e_r1'?`scaleX(${k})`:`translateY(${(1-k)*28}px)`;});
+  $$(endEl,'.er').forEach((el,i)=>{const k=E.expo(prog(t,t0+.8+i*.09,.6));el.style.opacity=clamp(prog(t,t0+.8+i*.09,.3));el.style.transform=`translateY(${(1-k)*20}px)`;});
+  $(endEl,'#e_ds').style.opacity=E.out(prog(t,t0+1.5,.5));$(endEl,'#e_wm').style.transform=`rotate(${(t-t0)*3}deg)`;}
+
+// ===================================================================================
+// CAPTIONS (Inter, gold active word, below the chin)
+// ===================================================================================
+const bot=document.createElement('div');bot.id='scrimB';stage.insertBefore(bot,stage.firstChild.nextSibling);
+const capEl=document.createElement('div');capEl.className='cap';stage.appendChild(capEl);
+const chunks=[];{let cur=[];W.forEach((w,i)=>{cur.push(i);const p=/[.,?!:]$/.test(w.w);if(cur.length>=3||p||(cur.length>=2&&W[i].w.length>11)){chunks.push(cur);cur=[];}});if(cur.length)chunks.push(cur);}
+function dcap(t){const on=t<PLAN.speech_end+.02&&t>=W[0].s-.05;capEl.style.opacity=on?1:0;bot.style.opacity=t<PLAN.speech_end?1:0;if(!on)return;
+  let ci=-1;for(let k=0;k<chunks.length;k++){const s=W[chunks[k][0]].s-.04;const nx=k+1<chunks.length?W[chunks[k+1][0]].s-.04:PLAN.speech_end+.05;if(t>=s&&t<nx){ci=k;break;}}
+  if(ci<0){capEl.innerHTML='';return;}
+  const ch=chunks[ci],st=W[ch[0]].s-.04,k=E.out(prog(t,st,.16));capEl.style.transform=`translateY(${(1-k)*10}px)`;capEl.style.opacity=.2+.8*k;
+  capEl.innerHTML=ch.map(i=>{const act=t>=W[i].s-.03&&(t<W[i].e||i===ch[ch.length-1]);return `<span class="${act?'on':''}" style="transform:scale(${act?1.04:1})">${W[i].w.replace(/[.,?!:]$/,'')}</span>`;}).join('');}
+
+function seek(t){let sc=0;
+  gs.forEach(g=>{const out=prog(t,g.b-g.dout,g.dout);const op=1-out;
+    if(t<g.a||t>g.b||op<=0){g.r.style.visibility='hidden';g.r.style.opacity=0;return;}
+    g.r.style.visibility='visible';g.r.style.opacity=op;g.r.style.transform=`translateY(${-26*E.io(out)}px)`;g.r.style.translate=`${Math.sin(t*.9+g.a)*5}px ${Math.cos(t*.7+g.a)*4}px`;g.upd(t,g.r);if(g.scrim)sc=Math.max(sc,op);});
+  scrim.style.opacity=Math.min(1,sc);
+  tone.style.opacity=.30*E.io(prog(t,T(48)-.2,.5))*(1-E.io(prog(t,T(71)-.1,.6)));
+  dEnd(t);dcap(t);}
+window.seek=seek;seek(0);
+</script></body></html>

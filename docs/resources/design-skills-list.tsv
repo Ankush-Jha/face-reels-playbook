@@ -1,0 +1,96 @@
+anthropics/skills	core	Anthropic official skills: frontend-design, canvas-design, theme-factory, brand-guidelines, algorithmic-art...
+greensock/gsap-skills	core	Official GSAP skills
+remotion-dev/skills	core	Remotion official skills
+heygen-com/hyperframes	core	HyperFrames framework + skills + catalog
+0xS4N4TG/papercut-explainer	have	
+pyang5166/gbro-collage-broll	core	halftone paper collage B-roll (original of VOX)
+YIAN6557/eian-riso-broll	core	risograph info animation
+MegaTroll222/VOX-COLLAGE-BROLL	core	paper collage explainer
+diffusionstudio/lottie	5.7k	Generate production-ready Lottie animations with Claude Code or Codex | [SAFE](https://age
+nolangz/pixel2motion	2.6k	AI logo animation skill: turn raster logos into smooth SVG animation, animated HTML demos,
+alexgreensh/anidoodle	1.6k	Art and animation, written as code. Illustrations, loops, interactive web art, launch-vide
+WoYun520/gif-factory	1.1k	GIF 工厂：按风格制作像素、人物与宠物、粘土吉祥物、光栅卡与动态海报的 GIF Skill。 | [SAFE](https://agentskillshub.top/skill/
+ythx-101/live-panel-skill	850	Config-driven animated architecture diagrams: turn one JSON file into a terminal-style, al
+lazypay/Archscribe	376	Premium hand-drawn, dark-background animated architecture & process diagrams. Outputs edit
+HRuiCcc/RuiC-motion-reel	195	一句话 brief 生成动态图形 / 动效宣传片 · Agent Skill。时长按 BPM×小节算（12–60 秒），默认 1920×1080；常规宣传片走 remotion/ 
+Liamrjohnston/remotion-motion-graphics-skill	158	Production-ready Remotion motion graphics skills for AI video workflows | [SAFE](https://a
+lisamsung/agent-meme-forge	100	Codex skill that turns one image or text concept into a WeChat-ready Chinese sticker pack 
+zz41354899/mografy	55	Create, preview, and export Canvas motion graphics with Claude Code or Codex. Local-first 
+fantuan-lab/animated-sticker-studio	46	One character image → a full pack of animated chat stickers (WeChat / Telegram / LINE / Di
+Felpborges/claude-video	45	Motion graphics com acabamento de estúdio no Claude Code, em português: galeria de estilos
+AgriciDaniel/claude-gif	31	Ultimate GIF creator skill for Claude Code. 6 generation pipelines: Remotion, Veo 3.1, SVG
+dillydog580/animate-roblox-characters	31	AI-driven Roblox R6/R15 animation skill for Codex and Claude, using authentic Blender rigs
+hughminhphan/motion-kit	31	a claude code skill that makes agent-made video move like a motion designer keyed it: curv
+iart-ai/kinetic-typography-skills	24	Kinetic typography skills for AI coding agents — turn text into beat-synced, animated type
+toufuim/personal-ip-brand-intro-skill	20	開源 Codex Skill：用文字、原創插圖或使用者圖片製作個人 IP 品牌開場，支援上傳音樂對拍與無音樂自主節拍。 | [SAFE](https://agentskillshu
+awesome-skills/manim-skill	13	Manim animation skill for Claude Code - create programmatic animations for technical blogs
+fernandokaraka/remotion-motion-graphics-skill	13	Claude Code skill: build animated motion graphics as real video with Remotion — title card
+liuhaisi2026212-maker/motion-palette-15	13	十五画境·AI 动画手艺书：教 AI 用代码做 MG 动画短片。说想要什么感觉，AI 来定风格、手法和工具：16 种风格卡（赛博 HUD、综艺花字、像素风、3D 软萌、剪纸皮影等）
+zhenwusw/orca-motion-skill	13	Agent skill for in-scene motion graphics built from abstract, design-token-driven shapes; 
+acelera-agency/html-animation	10	Motion graphics as code. An agent skill for building frame-exact animated logos, kinetic t
+rock3r/cav	10	Build, check and render Cavalry motion graphics from the terminal: the cav CLI and an agen
+sudadom/arabic-motion-graphics-skill	10	Agent skill for Arabic RTL motion graphics — reels, explainers, logo reveals with Remotion
+codie1982/chorono-editor	8	Open-source 2D animation editor. Create with Claude Code or Codex via MCP, then refine lay
+liuliu-66-create/ll-video-motion	8	Turn Chinese copy into local Remotion motion graphics with a Codex Skill | [SAFE](https://
+CJ10110425/logo-intro	6	WebGL logo intros from any SVG logo: lens-warped close-up, wordmark reveal, gradient bloom
+hacimertgokhan/geomotion	6	Hand-drawn morphing line animations from simple shapes. Zero-dependency JS engine + live s
+iart-ai/youtube-video-skills	6	Audiogram and YouTube intro/outro skills for Claude Code — brand your channel and repurpos
+YanKaFei/ascii-h3-director	5	An ASCII / kinetic-typography director for MiniMax H3, with deterministic preview and seam
+hubeiqiao/og-video-preview	5	Agent skill that turns any approved Open Graph image into a looping og:video. It plays in 
+luminexlabs-io/antigravity-remotion-skill	5	Its remotion for antigravity and ensure claude level remotion here. | [SAFE](https://agent
+NarratorAI-Studio/narrator-ai-cli-skill	3.2k	AI 解说大师 — Agent skill；封装 narrator-ai-cli 供 Claude/Codex 等工具调用 | [SAFE](https://agentskills
+bangtutorial/bang-motion	2.0k	Agent skill for browser motion graphics — openers, promos, bumpers, kinetic typography, an
+iart-ai/motion-skills	1.3k	50 open-source skills that teach your AI coding agent to make motion graphics, animation &
+FavioVazquez/showtime	327	A local video studio for your coding agent. Describe a video in one sentence: your agent d
+iart-ai/motion-design-skills	217	Motion design fundamentals, engines, and brand elements as installable Claude Code skills 
+LordVayron/video-factory	64	An AI video studio your coding agent installs and runs: UGC ads, micro-dramas, sitcoms, la
+PHANTOMTONYT/motion-design-skills	23	Five animation styles as Claude skills: 3D toy, kinetic type, hand-drawn cartoon, system d
+crawfordxx/xiaoma-studio	18	用代码做 Opus 5.5 爆款级动效视频与 HTML 幻灯片的 skill：30 条高赞视频拆解出的工作流、审美规则与确定性渲染引擎，任何模型/agent 可用 \| Code-
+hildlabs/openrig-studio	18	Generate Roblox R15 animations with the AI you already pay for: Claude Code, Codex CLI or 
+Kimeur/motion-launch-videos	13	Claude Code plugin + skill: turn a short brief into a looping kinetic-typography launch vi
+VasiniDevi/motion-skills	9	Programmatic motion design skills for AI agents — motion graphics, kinetic typography, dat
+hraness/slopcamera	7	slopcamera is retired and no longer maintained. Source and historical artifacts remain ava
+mackswendhell/motion-code	6	Vídeos animados feitos 100% em código, com voz por IA, e um editor para os vídeos que você
+Shugar86/vids-studio	5	Editable Google Vids videos and series with Codex & Claude Code. Skills, local MCP bridge,
+chrisopal/narrated-video-studio	5	讲解视频工坊：给 Claude 用的视频制作 skill 和工具箱（题材模板、风格包、检查、模板迭代） | [CAUTION](https://agentskillshub.top
+Tejashmakwana/motionmaxxing	1.5k	Looksmaxxing for motion graphics. An agent skill that turns AI slop videos into films that
+echris6/motion-video-kit	1.4k	Claude Code skill kit for premium AI-assisted business videos: independent critic loop, mo
+aaitor/skill-video-studio	390	Claude Code skill for product videos: real browser capture, branded composition, and local
+Avijit07x/cursorcam	94	Ask your AI agent for a demo video. It clicks through your web app and hands back a polish
+norahe0304-art/30x-video	64	One URL in, an agency-grade launch video out. A Claude Code skill (Remotion + React) with 
+imMamdouhaboammar/motion-graphics-skills	51	Motion graphics for AI agents. Creative direction + production skills for Claude Code & Co
+IskakovDamir/apple-motion	23	Claude skill for Apple-style kinetic typography recaps in Remotion, built from frame-accur
+derrickgong87/demo-video-creation-skill	23	A reusable Codex skill for creating polished SaaS and product demo videos from a company U
+smit-vanani/claude-promo-video	17	Turn a website URL into a premium, beat-locked product promo video with Remotion — origina
+jammaru/launch-video-craft	12	Agent Skill for creating polished product launch videos with real UI using Remotion. For C
+xsourabhsharma/remotion-marketing-video-skill	8	Agent skill for creating premium Remotion marketing videos product demos, SaaS promos, mot
+AlexAnsart/demo-studio	5	Agent skills that turn any web app into a polished, narrated demo video — Playwright captu
+GoRenku/studio	5	Open-source, local-first film studio you direct through Codex or Claude Code. Screenplay, 
+Teseife/diffusion-studio-codex	5	Independent Codex and Claude Code plugin for local video editing with Diffusion Studio. | 
+isaaclins/demo-video-skill	5	Claude Code skill: turn a website URL into a polished Screen-Studio-style product demo vid
+murathany7/reel-studio	5	Agency-quality marketing reels, ads and posts made by Claude Code. Free and open source, n
+surajshetty3416/demo-video-skill	5	Claude Code skill: polished 60fps ScreenStudio-style demo videos of any web app via Playwr
+GTKottman/mortiflix-oss	696	A motion design studio on your own machine: Claude makes the video step by step, you appro
+vakovalskii/nd-video-studio	33	Explainer videos from HTML (HyperFrames → MP4) with AI narrator, music and mixing — Claude
+ahmdd4vd/MotionCraft	28	Clean, high-taste motion graphics videos made by your AI agent with Remotion. One-command 
+reedodev/explainer-studio	20	One line in, an explainer video out, in eight hand-drawn styles (Claude Code skill) | [SAF
+cclank/lanshu-html2video-skill	19	Turn web articles into polished 1080p videos with Codex and Remotion | [SAFE](https://agen
+hdduytran/one-studio-skill	6	all in one creation video skill | [SAFE](https://agentskillshub.top/skill/hdduytran/one-st
+Vibha-Ramprakash/claude-video-effects	842	51 free video effects for Claude Code: drop in a talking-head clip, type /effects orbit. F
+PoetCoderJun/MotionTalk	12	Speak your ideas. Turn a recording into a concise, polished video with your Agent. 保留原声，让好
+HibaBenzahra/HibAi-Editing-Studio	5	🎬 HibAI Studio — a Claude skill that turns your talking video into a ready-to-post reel: s
+yerinsabraham/video-edit-skill	5	Drop your raw clips, type /video-edit, get a finished short-form video. Best takes, kineti
+ouerf-man/kinetic-editorial-skill	16	Claude Code skill: word-by-word kinetic caption reels (9:16) built with HyperFrames + Thre
+TheNoumanDev/zero-dollar-studio	15	Make YouTube videos with Claude Code for $0: free guides + Claude Code skills (make-video,
+social-media-skills/remotion-shorts-skill	15	Remotion skill, free: Claude Code, Codex, Cursor and OpenClaw turn a topic, data or change
+adriiita/vertical-video-editing-skill	14	Claude skill: turn a script + talking-head media into a polished, creator-grade vertical 9
+MuhammadaliMS/pixel-studio	10	Make viral pixel-art videos with Claude. A free, dependency-free engine: every pixel, phys
+kvrancic/oneshot-video	6	One-shot AI video studio for Claude Code, Codex and Cursor. Raw footage in: a finished edi
+liangdabiao/wechat-article-remotion	6	动画skill: 把任意一篇微信公众号文章 转成 Studio 风格的 Remotion 视频 —— 暖白画布 + 上下镜像透视格子 + 顶部章节进度 + 公众号原文图完整保留 |
+xdis/opus-video-studio	2	A short-video studio where Claude Opus 5.5 writes the script and the code, and your Mac re
+Kanvis-chen/kanvis-video	54	Kanvis Video: open-source Codex Skills and a local Kanvis Studio workspace for turning lon
+tuzhechen2005/opus-video-skills	476	Video-making skills for Claude Opus 5.5 in Claude Code — every frame and note generated in
+hsynozdamar-byte/cinecode-studio	26	Desktop production panel for cinecode: write an idea, approve a timed script, and Claude C
+i-afaqrashid/claude-animation-studio	9	Claude Code plugin: animated short films where every frame is drawn in code and the music 
+chenqianshinian/music-mv-studio	8	音乐视频（MV）制作 Agent Skill：把「一首歌 + 一份歌词」做成竖版 MV —— 导演方法 + 跑过七首长片的生成管线 + 像素级质检 + 41 条真实踩坑清单｜Mus
+bishpls/animation-pipeline	7	Films made with Claude Code: songs, cut-paper riso animation, kinetic type, all in code. F
